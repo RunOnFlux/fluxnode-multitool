@@ -1383,9 +1383,9 @@ EOF
 
 function basic_security() {
     echo -e "${ARROW} ${YELLOW}Configuring firewall and enabling fail2ban...${NC}"
-    sudo ufw allow 16124/tcp > /dev/null 2>&1
-    sudo ufw allow "$SSHPORT"/tcp > /dev/null 2>&1
-    sudo ufw allow "$PORT"/tcp > /dev/null 2>&1
+    sudo ufw allow $RPCPORT/tcp comment "FLUX RPCPORT" > /dev/null 2>&1
+    sudo ufw allow $SSHPORT/tcp > /dev/null 2>&1
+    sudo ufw allow $PORT/tcp comment "FLUX" > /dev/null 2>&1
     sudo ufw logging on > /dev/null 2>&1
     sudo ufw default deny incoming > /dev/null 2>&1
     
@@ -1393,10 +1393,10 @@ function basic_security() {
     sudo ufw allow out to any port 80 > /dev/null 2>&1
     sudo ufw allow out to any port 443 > /dev/null 2>&1
     sudo ufw allow out to any port 53 > /dev/null 2>&1
-    sudo ufw allow out to any port 16124 > /dev/null 2>&1
-    sudo ufw allow out to any port 16125 > /dev/null 2>&1
-    sudo ufw allow out to any port 16127 > /dev/null 2>&1
-    sudo ufw allow from any to any port 16127 > /dev/null 2>&1
+    sudo ufw allow out to any port $RPCPORT comment "FLUX RPCPORT" > /dev/null 2>&1
+    sudo ufw allow out to any port $PORT comment "FLUX" > /dev/null 2>&1
+    sudo ufw allow out to any port $LOCPORT comment "FLUX LOCPORT" > /dev/null 2>&1
+    sudo ufw allow from any to any port $LOCPORT comment "FLUX LOCPORT" > /dev/null 2>&1
     
     sudo ufw default deny outgoing > /dev/null 2>&1
     sudo ufw limit OpenSSH > /dev/null 2>&1
@@ -1526,10 +1526,10 @@ EOF
 function install_process() {
  
     echo -e "${ARROW} ${YELLOW}Configuring firewall...${NC}"
-    sudo ufw allow $ZELFRONTPORT/tcp > /dev/null 2>&1
-    sudo ufw allow $LOCPORT/tcp > /dev/null 2>&1
-    sudo ufw allow $ZELNODEPORT/tcp > /dev/null 2>&1
-    #sudo ufw allow $MDBPORT/tcp > /dev/null 2>&1
+    sudo ufw allow $ZELFRONTPORT/tcp comment "FLUX FRONTPORT" > /dev/null 2>&1
+    sudo ufw allow $LOCPORT/tcp comment "FLUX LOCPORT" > /dev/null 2>&1
+    sudo ufw allow $ZELNODEPORT/tcp comment "FLUX NODEPORT" > /dev/null 2>&1
+    #sudo ufw allow $MDBPORT/tcp comment "FLUX MDBPORT" > /dev/null 2>&1
 
     echo -e "${ARROW} ${YELLOW}Configuring service repositories...${NC}"
     
