@@ -2199,6 +2199,9 @@ if [[ $1 == "restart" ]]; then
   if [[ "$device_name" != "" && "$WANIP" != "" ]]; then
    date_timestamp=$(date '+%Y-%m-%d %H:%M:%S')
    echo -e "New IP detected, IP: $WANIP was added at $date_timestamp" >> /home/$USER/ip_history.log
+   for i in $(ip --oneline addr show ${device_name}:0 | grep "/32" | awk '{print $4}'); do
+      sudo ip addr del $i dev $device_name:0
+   done
    sudo ip addr add $WANIP dev $device_name:0 && sleep 2
   fi
 
@@ -2215,6 +2218,9 @@ if [[ $1 == "ip_check" ]]; then
     if [[ "$WANIP" != "$confirmed_ip" ]]; then
       date_timestamp=$(date '+%Y-%m-%d %H:%M:%S')
       echo -e "New IP detected, IP: $WANIP was added at $date_timestamp" >> /home/$USER/ip_history.log
+      for i in $(ip --oneline addr show ${device_name}:0 | grep "/32" | awk '{print $4}'); do
+         sudo ip addr del $i dev $device_name:0
+      done
       sudo ip addr add $WANIP dev $device_name:0 && sleep 2
     fi
 
