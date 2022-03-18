@@ -2174,6 +2174,8 @@ sudo chown $USER:$USER /home/$USER/ip_check.sh
     cat <<'EOF' > /home/$USER/ip_check.sh
 #!/bin/bash
 
+USER=$(whoami)
+
 function get_ip(){
 
  WANIP=$(curl --silent -m 10 https://api4.my-ip.io/ip | tr -dc '[:alnum:].')
@@ -2211,7 +2213,7 @@ if [[ $1 == "ip_check" ]]; then
 
   get_ip
   device_name=$(ip addr | grep 'BROADCAST,MULTICAST,UP,LOWER_UP' | head -n1 | awk '{print $2}' | sed 's/://' | sed 's/@/ /' | awk '{print $1}')
-  confirmed_ip=$(curl -SsL -m 10 http://localhost:16127/flux/info | jq -r .data.node.status.ip)
+  confirmed_ip=$(curl -SsL --retry 5 -m 10 http://localhost:16127/flux/info | jq -r .data.node.status.ip)
 
   if [[ "$WANIP" != "" && "$confirmed_ip" != "" ]]; then
 
