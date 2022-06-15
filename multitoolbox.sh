@@ -66,11 +66,11 @@ do
     if [[ "$bootstrap_check" != "" ]]; then
     #echo -e "Adding:  ${rand_by_domain[$i]}"
 
-       if [[ "${rand_by_domain[$i]}" -le "4" && "${rand_by_domain[$i]}" -ge "8" ]]; then
+       if [[ "${rand_by_domain[$i]}" -lt "5" &&  "${rand_by_domain[$i]}" -gt "7" ]]; then
          richable_eu+=( ${rand_by_domain[$i]}  )
        fi
 
-       if [[ "${rand_by_domain[$i]}" -gt "4" &&  "${rand_by_domain[$i]}" -le "7" ]]; then
+       if [[ "${rand_by_domain[$i]}" -gt "4" &&  "${rand_by_domain[$i]}" -lt "8" ]]; then
          richable_us+=( ${rand_by_domain[$i]}  )
        fi
 
