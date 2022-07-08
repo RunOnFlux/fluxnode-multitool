@@ -1397,6 +1397,43 @@ bash -i <(curl -s https://raw.githubusercontent.com/RunOnFlux/fluxnode-multitool
 
 }
 
+function multinode(){
+
+echo -e "${GREEN}Module: Multinode configuration with UPNP communication (Needs Router with UPNP support)${NC}"
+echo -e "${YELLOW}================================================================${NC}"
+
+if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
+    echo -e "${CYAN}You are currently logged in as ${GREEN}$USER${NC}"
+    echo -e "${CYAN}Please switch to the user account.${NC}"
+    echo -e "${YELLOW}================================================================${NC}"
+    echo -e "${NC}"
+    exit
+fi
+    
+    echo -e ""
+    echo -e "${ARROW}  ${CYAN}OPTION ALLOWS YOU: ${NC}"
+    echo -e "${HOT} ${CYAN}Run node as selfhosting with upnp communication ${NC}"
+    echo -e "${HOT} ${CYAN}Create up to 8 node using same public address ${NC}"
+    echo -e ""
+    echo -e "${ARROW}  ${RED}IMPORTANT:${NC}"
+    echo -e "${BOOK} ${RED}Each node need to set different port for communication${NC}"
+    echo -e "${BOOK} ${RED}If FluxOs fails to communicate with router or upnp fails it will shutdown FluxOS... ${NC}"
+    echo -e ""
+    echo -e "${YELLOW}================================================================${NC}"
+    echo -e ""
+    
+    if [[ ! -f /home/$USER/zelflux/config/userconfig.js ]]; then
+      echo -e "${WORNING} ${CYAN}First install FluxNode...${NC}"
+      echo -e "${WORNING} ${CYAN}Operation stopped...${NC}"
+      echo -e ""
+      exit
+    fi  
+    
+    sleep 15
+    bash -i <(curl -s https://raw.githubusercontent.com/RunOnFlux/fluxnode-multitool/master/multinode.sh)
+
+}
+
 function install_docker(){
 
 echo -e "${GREEN}Module: Install Docker${NC}"
@@ -1873,8 +1910,8 @@ if [[ $(dpkg --print-architecture) = *amd* ]]; then
   sudo mv /tmp/fluxd /usr/local/bin > /dev/null 2>&1
   sudo mv /tmp/flux-cli /usr/local/bin > /dev/null 2>&1
 
-  sudo wget https://github.com/RunOnFlux/fluxd/releases/download/halving-test-2/Fluxbench-Linux-v3.0.0.tar.gz -P /tmp > /dev/null 2>&1
-  sudo tar xzvf /tmp/Fluxbench-Linux-v3.0.0.tar.gz -C /tmp > /dev/null 2>&1
+  sudo wget https://github.com/RunOnFlux/fluxd/releases/download/halving-test-2/Fluxbench-Linux-v3.3.0.tar.gz -P /tmp > /dev/null 2>&1
+  sudo tar xzvf /tmp/Fluxbench-Linux-v3.3.0.tar.gz -C /tmp > /dev/null 2>&1
   sudo mv /tmp/fluxbenchd /usr/local/bin > /dev/null 2>&1
   sudo mv /tmp/fluxbench-cli /usr/local/bin > /dev/null 2>&1
   sudo rm -rf  /tmp/flux* 2>&1 && sleep 2
@@ -1888,8 +1925,8 @@ else
   sudo mv /tmp/fluxd /usr/local/bin > /dev/null 2>&1
   sudo mv /tmp/flux-cli /usr/local/bin > /dev/null 2>&1
 
-  sudo wget https://github.com/RunOnFlux/fluxd/releases/download/halving-test-2/Fluxbench-arm-v3.0.0.tar.gz -P /tmp > /dev/null 2>&1
-  sudo tar xzvf /tmp/Fluxbench-arm-v3.0.0.tar.gz -C /tmp > /dev/null 2>&1
+  sudo wget https://github.com/RunOnFlux/fluxd/releases/download/halving-test-2/Fluxbench-arm-v3.3.0.tar.gz -P /tmp > /dev/null 2>&1
+  sudo tar xzvf /tmp/Fluxbench-arm-v3.3.0.tar.gz -C /tmp > /dev/null 2>&1
   sudo mv /tmp/fluxbenchd /usr/local/bin > /dev/null 2>&1
   sudo mv /tmp/fluxbench-cli /usr/local/bin > /dev/null 2>&1
   sudo rm -rf  /tmp/flux* 2>&1 && sleep 2
@@ -2062,10 +2099,11 @@ echo -e "${GREEN}OS: Ubuntu 16/18/19/20, Debian 9/10 ${NC}"
 echo -e "${GREEN}Created by: X4MiLX from Flux's team${NC}"
 echo -e "${GREEN}Special thanks to dk808, CryptoWrench && jriggs28${NC}"
 echo -e "${YELLOW}================================================================${NC}"
-echo -e "${CYAN}1  - Install Docker${NC}"
-echo -e "${CYAN}2  - Install FluxNode${NC}"
-echo -e "${CYAN}3  - Update flux daemon and benchmark binary${NC}"
-echo -e "${CYAN}4  - Install/Re-install FluxOS${NC}"
+echo -e "${CYAN}1 - Install Docker${NC}"
+echo -e "${CYAN}2 - Install FluxNode${NC}"
+echo -e "${CYAN}3 - Update flux daemon and benchmark binary${NC}"
+echo -e "${CYAN}4 - Install/Re-install FluxOS${NC}"
+echo -e "${CYAN}5 - Multinode configuration with UPNP communication (Needs Router with UPNP support)  ${NC}"
 echo -e "${YELLOW}================================================================${NC}"
 
 read -rp "Pick an option and hit ENTER: "
@@ -2091,5 +2129,10 @@ read -rp "Pick an option and hit ENTER: "
     clear
     sleep 1
     install_flux
+ ;;
+   5) 
+    clear
+    sleep 1
+    multinode
  ;;
     esac

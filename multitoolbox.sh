@@ -38,7 +38,7 @@ ARROW="${SEA}\xE2\x96\xB6${NC}"
 BOOK="${RED}\xF0\x9F\x93\x8B${NC}"
 HOT="${ORANGE}\xF0\x9F\x94\xA5${NC}"
 WORNING="${RED}\xF0\x9F\x9A\xA8${NC}"
-dversion="v7.0"
+dversion="v7.1"
 
 PM2_INSTALL="0"
 zelflux_setting_import="0"
@@ -49,7 +49,7 @@ title=black,
 '
 
 function bootstrap_server(){
-rand_by_domain=("1" "3" "5" "6" "7" "8" "9" "10" "11" "12" "13" "14")
+rand_by_domain=("5" "6" "7" "8" "9" "10" "11")
 richable=()
 richable_eu=()
 richable_us=()
@@ -66,16 +66,12 @@ do
     if [[ "$bootstrap_check" != "" ]]; then
     #echo -e "Adding:  ${rand_by_domain[$i]}"
 
-       if [[ "${rand_by_domain[$i]}" -le "3" || "${rand_by_domain[$i]}" -gt "11" ]]; then
+       if [[ "${rand_by_domain[$i]}" -ge "8" && "${rand_by_domain[$i]}" -le "11" ]]; then
          richable_eu+=( ${rand_by_domain[$i]}  )
        fi
 
-       if [[ "${rand_by_domain[$i]}" -gt "3" &&  "${rand_by_domain[$i]}" -le "10" ]]; then
+       if [[ "${rand_by_domain[$i]}" -gt "4" &&  "${rand_by_domain[$i]}" -le "7" ]]; then
          richable_us+=( ${rand_by_domain[$i]}  )
-       fi
-
-       if [[ "${rand_by_domain[$i]}" -gt "10" ]]; then
-         richable_as+=( ${rand_by_domain[$i]}  )
        fi
 
         richable+=( ${rand_by_domain[$i]} )
@@ -390,14 +386,10 @@ function pm2_install(){
 function config_file() {
 
 if [[ -f /home/$USER/install_conf.json ]]; then
+
 import_settings=$(cat /home/$USER/install_conf.json | jq -r '.import_settings')
-ssh_port=$(cat /home/$USER/install_conf.json | jq -r '.ssh_port')
-firewall_disable=$(cat /home/$USER/install_conf.json | jq -r '.firewall_disable')
 bootstrap_url=$(cat /home/$USER/install_conf.json | jq -r '.bootstrap_url')
 bootstrap_zip_del=$(cat /home/$USER/install_conf.json | jq -r '.bootstrap_zip_del')
-swapon=$(cat /home/$USER/install_conf.json | jq -r '.swapon')
-mongo_bootstrap=$(cat /home/$USER/install_conf.json | jq -r '.mongo_bootstrap')
-watchdog=$(cat /home/$USER/install_conf.json | jq -r '.watchdog')
 use_old_chain=$(cat /home/$USER/install_conf.json | jq -r '.use_old_chain')
 prvkey=$(cat /home/$USER/install_conf.json | jq -r '.prvkey')
 outpoint=$(cat /home/$USER/install_conf.json | jq -r '.outpoint')
@@ -406,7 +398,6 @@ zel_id=$(cat /home/$USER/install_conf.json | jq -r '.zelid')
 kda_address=$(cat /home/$USER/install_conf.json | jq -r '.kda_address')
 
 echo -e "${ARROW} ${YELLOW}Install config summary:"
-
 if [[ "$prvkey" != "" && "$outpoint" != "" && "$index" != "" ]];then
 echo -e "${PIN}${CYAN}Import settings from install_conf.json...........................[${CHECK_MARK}${CYAN}]${NC}" && sleep 1
 else
@@ -415,17 +406,6 @@ if [[ "$import_settings" == "1" ]]; then
 echo -e "${PIN}${CYAN}Import settings from exist config files..........................[${CHECK_MARK}${CYAN}]${NC}" && sleep 1
 fi
 
-fi
-
-if [[ "$ssh_port" != "" ]]; then
-string_limit_check_mark_port "SSH port: $ssh_port ...................................................................." "SSH port: ${GREEN}$ssh_port ${CYAN}...................................................................."
-sleep 1
-fi
-
-if [[ "$firewall_disable" == "1" ]]; then
-echo -e "${PIN}${CYAN}Firewall disabled diuring installation...........................[${CHECK_MARK}${CYAN}]${NC}" && sleep 1
-else
-echo -e "${PIN}${CYAN}Firewall enabled diuring installation............................[${CHECK_MARK}${CYAN}]${NC}" && sleep 1
 fi
 
 if [[ "$use_old_chain" == "1" ]]; then
@@ -447,17 +427,14 @@ fi
 
 fi
 
-if [[ "$swapon" == "1" ]]; then
-echo -e "${PIN}${CYAN}Create a file that will be used for swap.........................[${CHECK_MARK}${CYAN}]${NC}" && sleep 1
+
+if [[ ( "$discord" != "" && "$discord" != "0" ) || "$telegram_alert" == '1' ]]; then
+echo -e "${PIN}${CYAN}Enable watchdog notification.....................................[${CHECK_MARK}${CYAN}]${NC}" && sleep 1
+else
+echo -e "${PIN}${CYAN}Disable watchdog notification....................................[${CHECK_MARK}${CYAN}]${NC}" && sleep 1
 fi
 
-#if [[ "$mongo_bootstrap" == "1" ]]; then
-#echo -e "${PIN}${CYAN}Use Bootstrap for MongoDB........................................[${CHECK_MARK}${CYAN}]${NC}" && sleep 1
-#fi
 
-if [[ "$watchdog" == "1" ]]; then
-echo -e "${PIN}${CYAN}Install watchdog.................................................[${CHECK_MARK}${CYAN}]${NC}" && sleep 1
-fi
 fi
 }
 
@@ -688,6 +665,8 @@ fi
 }
 
 function create_config() {
+
+
 if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
     echo -e "${CYAN}You are currently logged in as ${GREEN}$USER${NC}"
     echo -e "${CYAN}Please switch to the user account.${NC}"
@@ -701,22 +680,22 @@ echo -e "${YELLOW}==============================================================
 
 
 if jq --version > /dev/null 2>&1; then
-sleep 0.2
+  sleep 0.2
 else
-echo -e "${ARROW} ${YELLOW}Installing JQ....${NC}"
-sudo apt  install jq -y > /dev/null 2>&1
+  echo -e "${ARROW} ${YELLOW}Installing JQ....${NC}"
+  sudo apt  install jq -y > /dev/null 2>&1
 
-  if jq --version > /dev/null 2>&1
-  then
-    #echo -e "${ARROW} ${CYAN}Nodejs version: ${GREEN}$(node -v)${CYAN} installed${NC}"
-    string_limit_check_mark "JQ $(jq --version) installed................................." "JQ ${GREEN}$(jq --version)${CYAN} installed................................."
-    echo
-  else
-    #echo -e "${ARROW} ${CYAN}Nodejs was not installed${NC}"
-    string_limit_x_mark "JQ was not installed................................."
-    echo
-    exit
-  fi
+    if jq --version > /dev/null 2>&1
+    then
+      #echo -e "${ARROW} ${CYAN}Nodejs version: ${GREEN}$(node -v)${CYAN} installed${NC}"
+      string_limit_check_mark "JQ $(jq --version) installed................................." "JQ ${GREEN}$(jq --version)${CYAN} installed................................."
+      echo
+    else
+     #echo -e "${ARROW} ${CYAN}Nodejs was not installed${NC}"
+      string_limit_x_mark "JQ was not installed................................."
+      echo
+      exit
+    fi
 fi
 
 skip_zelcash_config='0'
@@ -741,108 +720,230 @@ if [[ -d /home/$USER/$CONFIG_DIR ]]; then
     use_old_chain='0'
     sleep 1
   fi
-
-
+  
 fi
 
 if [[ "$skip_zelcash_config" == "1" ]]; then
-prvkey=""
-outpoint=""
-index=""
-zelid=""
-kda_address=""
+
+  prvkey=""
+  outpoint=""
+  index=""
+  zelid=""
+  kda_address=""
+  node_label="0" 
+  fix_action="1"      
+  eps_limit="0"
+  discord="0"
+  ping="0"
+  telegram_alert="0"    
+  telegram_bot_token="0"	      	      
+  telegram_chat_id="0"	
+   
 else
 
-prvkey=$(whiptail --inputbox "Enter your FluxNode Identity Key from Zelcore" 8 65 3>&1 1>&2 2>&3)
-sleep 1
-outpoint=$(whiptail --inputbox "Enter your FluxNode Collateral TX ID from Zelcore" 8 72 3>&1 1>&2 2>&3)
-sleep 1
-index=$(whiptail --inputbox "Enter your FluxNode Output Index from Zelcore" 8 65 3>&1 1>&2 2>&3)
-sleep 1
-zel_id=$(whiptail --inputbox "Enter your ZEL ID from ZelCore (Apps -> Zel ID (CLICK QR CODE)) " 8 72 3>&1 1>&2 2>&3)
-sleep 1
-KDA_A=$(whiptail --inputbox "Please enter your Kadena address from Zelcore" 8 85 3>&1 1>&2 2>&3)
-sleep 1
-KDA_C=$(whiptail --inputbox "Please enter your kadena chainid (0-19)" 8 85 3>&1 1>&2 2>&3)
+  prvkey=$(whiptail --inputbox "Enter your FluxNode Identity Key from Zelcore" 8 65 3>&1 1>&2 2>&3)
+  sleep 1
+  outpoint=$(whiptail --inputbox "Enter your FluxNode Collateral TX ID from Zelcore" 8 72 3>&1 1>&2 2>&3)
+  sleep 1
+  index=$(whiptail --inputbox "Enter your FluxNode Output Index from Zelcore" 8 65 3>&1 1>&2 2>&3)
+  sleep 1
+  zel_id=$(whiptail --inputbox "Enter your ZEL ID from ZelCore (Apps -> Zel ID (CLICK QR CODE)) " 8 72 3>&1 1>&2 2>&3)
+  sleep 1
+  KDA_A=$(whiptail --inputbox "Please enter your Kadena address from Zelcore" 8 85 3>&1 1>&2 2>&3)
+  sleep 1
 
-    if [[ "$KDA_A" == "" ]]; then 
-        kda_address=""
+    if whiptail --yesno "Would you like enable autoupdate?" 8 65; then
+      zelflux_update='1'
+      zelcash_update='1'
+      zelbench_update='1'
     else
-        kda_address="kadena:$KDA_A?chainid=$KDA_C"
+      zelflux_update='0'
+      zelcash_update='0'
+      zelbench_update='0'   
     fi
 
+
+  if [[ "$KDA_A" == "" ]]; then 
+      kda_address=""
+  else
+      kda_address="kadena:$KDA_A?chainid=0"
+  fi
+    
+  if whiptail --yesno "Would you like enable alert notification?" 8 65; then
+
+      whiptail --msgbox "Info: to select/deselect item use 'space' ...to switch to OK/Cancel use 'tab' " 10 60
+      sleep 1
+
+      CHOICES=$(whiptail --title "Choose options: " --separate-output --checklist "Choose options: " 10 45 5 \
+      "1" "Discord notification      " ON \
+      "2" "Telegram notification     " OFF 3>&1 1>&2 2>&3 )
+
+      if [ -z "$CHOICES" ]; then
+
+        echo -e "${ARROW} ${CYAN}No option was selected...Alert notification disabled! ${NC}"
+        sleep 1
+        discord="0"
+        ping="0"
+        telegram_alert="0"
+        telegram_bot_token="0"
+        telegram_chat_id="0"
+        node_label="0"
+
+      else
+      
+         for CHOICE in $CHOICES; do
+         case "$CHOICE" in
+         "1")
+
+            discord=$(whiptail --inputbox "Enter your discord server webhook url" 8 65 3>&1 1>&2 2>&3)
+            sleep 1
+
+            if whiptail --yesno "Would you like enable nick ping on discord?" 8 60; then
+
+             while true
+             do
+               ping=$(whiptail --inputbox "Enter your discord user id" 8 60 3>&1 1>&2 2>&3)
+              if [[ $ping == ?(-)+([0-9]) ]]; then
+               string_limit_check_mark "UserID is valid..........................................."
+               break
+              else
+               string_limit_x_mark "UserID is not valid try again............................."
+               sleep 1
+              fi
+             done
+
+             sleep 1
+
+            else
+             ping="0"
+             sleep 1
+           fi
+
+         ;;
+         "2")
+
+          telegram_alert="1"
+
+         while true
+         do
+          telegram_bot_token=$(whiptail --inputbox "Enter telegram bot token from BotFather" 8 65 3>&1 1>&2 2>&3)
+          if [[ $(grep ':' <<< "$telegram_bot_token") != "" ]]; then
+            string_limit_check_mark "Bot token is valid..........................................."
+            break
+          else
+            string_limit_x_mark "Bot token is not valid try again............................."
+            sleep 1
+         fi
+        done
+
+     sleep 1
+
+        while true
+        do
+        telegram_chat_id=$(whiptail --inputbox "Enter your chat id from GetIDs Bot" 8 60 3>&1 1>&2 2>&3)
+        if [[ $telegram_chat_id == ?(-)+([0-9]) ]]; then
+           string_limit_check_mark "Chat ID is valid..........................................."
+           break
+         else
+           string_limit_x_mark "Chat ID is not valid try again............................."
+           sleep 1
+        fi
+        done
+
+       sleep 1
+
+      ;;
+    esac
+  done
 fi
 
-ssh_port=$(whiptail --inputbox "Enter port you are using for SSH (default 22)" 8 65 3>&1 1>&2 2>&3)
-sleep 1
+ while true
+     do
+       node_label=$(whiptail --inputbox "Enter name of your node (alias)" 8 65 3>&1 1>&2 2>&3)
+        if [[ "$node_label" != "" && "$node_label" != "0"  ]]; then
+           string_limit_check_mark "Node name is valid..........................................."
+           break
+         else
+           string_limit_x_mark "Node name is not valid try again............................."
+           sleep 1
+        fi
+    done
 
-
-pettern='^[0-9]+$'
-if [[ $ssh_port =~ $pettern ]] ; then
-sleep 1
 else
-echo -e "${ARROW} ${CYAN}SSH port must be integer.................................[${X_MARK}${CYAN}]${NC}"
-echo
-exit
+
+    discord="0"
+    ping="0"
+    telegram_alert="0"
+    telegram_bot_token="0"
+    telegram_chat_id="0"
+    node_label="0"
+    sleep 1
+    
 fi
 
 
-if whiptail --yesno "Would you like disable firewall diuring installation?" 8 65; then
-firewall_disable='1'
-sleep 1
+if [[ "$discord" == 0 ]]; then
+    ping="0"
+fi
+
+
+if [[ "$telegram_alert" == 0 || "$telegram_alert" == "" ]]; then
+    telegram_alert="0"
+    telegram_bot_token="0"
+    telegram_chat_id="0"
+fi
+
+  index_from_file="$index"
+  tx_from_file="$outpoint"
+  stak_info=$(curl -s -m 5 https://explorer.runonflux.io/api/tx/$tx_from_file | jq -r ".vout[$index_from_file] | .value,.n,.scriptPubKey.addresses[0],.spentTxId" | paste - - - - | awk '{printf "%0.f %d %s %s\n",$1,$2,$3,$4}' | grep 'null' | egrep -o '10000|25000|100000|1000|12500|40000')
+	
+if [[ "$stak_info" == "" ]]; then
+    stak_info=$(curl -s -m 5 https://explorer.zelcash.online/api/tx/$tx_from_file | jq -r ".vout[$index_from_file] | .value,.n,.scriptPubKey.addresses[0],.spentTxId" | paste - - - - | awk '{printf "%0.f %d %s %s\n",$1,$2,$3,$4}' | grep 'null' | egrep -o '10000|25000|100000|1000|12500|40000')
+fi	
+
+if [[ $stak_info == ?(-)+([0-9]) ]]; then
+
+  case $stak_info in
+   "10000") eps_limit=90 ;;
+   "25000")  eps_limit=180 ;;
+   "100000") eps_limit=300 ;;
+   "1000") eps_limit=90 ;;
+   "12500")  eps_limit=180 ;;
+   "40000") eps_limit=300 ;;
+  esac
+ 
 else
-firewall_disable='0'
-sleep 1
+  eps_limit=0;
 fi
+
 
 
 if [[ "$skip_bootstrap" == "0" ]]; then
 
-if whiptail --yesno "Would you like use Flux bootstrap from script source?" 8 65; then
+  if whiptail --yesno "Would you like use Flux bootstrap from script source?" 8 65; then
       
-bootstrap_server_index=$(shuf -i 1-11 -n 1)
-bootstrap_url="https://cdn-$bootstrap_server_index.runonflux.io/apps/fluxshare/getfile/flux_explorer_bootstrap.tar.gz"
-sleep 1
+    bootstrap_url="0"
+    sleep 1
 
-else
-bootstrap_url=$(whiptail --inputbox "Enter your Flux bootstrap URL" 8 65 3>&1 1>&2 2>&3)
-sleep 1
+  else
+    bootstrap_url=$(whiptail --inputbox "Enter your Flux bootstrap URL" 8 65 3>&1 1>&2 2>&3)
+    sleep 1
+  fi
+
+  if whiptail --yesno "Would you like keep bootstrap archive file localy?" 8 65; then
+    bootstrap_zip_del='0'
+    sleep 1
+  else
+    bootstrap_zip_del='1'
+    sleep 1
+  fi
+  
 fi
 
-if whiptail --yesno "Would you like keep bootstrap archive file localy?" 8 65; then
-bootstrap_zip_del='0'
-sleep 1
-else
-bootstrap_zip_del='1'
-sleep 1
-fi
 fi
 
-if whiptail --yesno "Would you like create swapfile?" 8 65; then
+firewall_disable='1'
 swapon='1'
-sleep 1
-else
-swapon='0'
-sleep 1
-fi
-
-
-if whiptail --yesno "Would you like use mongod bootstrap file?" 8 65; then
-mongo_bootstrap='1'
-sleep 1
-else
-mongo_bootstrap='0'
-sleep 1
-fi
-
-
-if whiptail --yesno "Would you like install FluxNode watchdog?" 8 65; then
-watchdog='1'
-sleep 1
-else
-watchdog='0'
-sleep 1
-fi
 
 rm /home/$USER/install_conf.json > /dev/null 2>&1
 sudo touch /home/$USER/install_conf.json
@@ -855,20 +956,26 @@ sudo chown $USER:$USER /home/$USER/install_conf.json
   "index": "${index}",
   "zelid": "${zel_id}",
   "kda_address": "${kda_address}",
-  "ssh_port": "${ssh_port}",
   "firewall_disable": "${firewall_disable}",
   "bootstrap_url": "${bootstrap_url}",
   "bootstrap_zip_del": "${bootstrap_zip_del}",
   "swapon": "${swapon}",
-  "mongo_bootstrap": "${mongo_bootstrap}",
   "use_old_chain": "${use_old_chain}",
-  "watchdog": "${watchdog}"
+  "node_label": "${node_label}",
+  "zelflux_update": "${zelflux_update}",
+  "zelcash_update": "${zelcash_update}",
+  "zelbench_update": "${zelbench_update}",
+  "discord": "${discord}",
+  "ping": "${ping}",
+  "telegram_alert": "${telegram_alert}",
+  "telegram_bot_token": "${telegram_bot_token}",
+  "telegram_chat_id": "${telegram_chat_id}",
+  "eps_limit": "${eps_limit}"
 }
 EOF
+
 config_file
 echo
-
-
 
 }
 
@@ -911,29 +1018,29 @@ cd watchdog && npm install > /dev/null 2>&1
 echo -e "${ARROW} ${CYAN}Creating config file....${NC}"
 
 
-#if whiptail --yesno "Would you like enable FluxOS auto update?" 8 60; then
+if whiptail --yesno "Would you like enable FluxOS auto update?" 8 60; then
 flux_update='1'
-#sleep 1
-#else
-##flux_update='0'
-#sleep 1
-#fi
+sleep 1
+else
+flux_update='0'
+sleep 1
+fi
 
-#if whiptail --yesno "Would you like enable Flux daemon auto update?" 8 60; then
+if whiptail --yesno "Would you like enable Flux daemon auto update?" 8 60; then
 daemon_update='1'
-##sleep 1
-#else
-#daemon_update='0'
-##sleep 1
-#fi
+sleep 1
+else
+daemon_update='0'
+sleep 1
+fi
 
-#if whiptail --yesno "Would you like enable Flux benchmark auto update?" 8 60; then
+if whiptail --yesno "Would you like enable Flux benchmark auto update?" 8 60; then
 bench_update='1'
-#sleep 1
-#else
-##bench_update='0'
-##sleep 1
-#fi
+sleep 1
+else
+bench_update='0'
+sleep 1
+fi
 
 #if whiptail --yesno "Would you like enable fix action (restart daemon, benchmark, mongodb)?" 8 75; then
 fix_action='1'
@@ -1601,7 +1708,13 @@ if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
 fi
 
 if [[ $(lsb_release -d) != *Debian* && $(lsb_release -d) != *Ubuntu* ]]; then
+   echo -e "${WORNING} ${CYAN}ERROR: ${RED}OS version not supported${NC}"
+   echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
+   echo
+   exit
+fi
 
+if [[ $(lsb_release -cs) == "jammy" ]]; then
    echo -e "${WORNING} ${CYAN}ERROR: ${RED}OS version not supported${NC}"
    echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
    echo
@@ -1609,7 +1722,7 @@ if [[ $(lsb_release -d) != *Debian* && $(lsb_release -d) != *Ubuntu* ]]; then
 fi
 
 
-if docker run hello-world > /dev/null 2>&1
+if sudo docker run hello-world > /dev/null 2>&1
 then
 echo -e ""
 else
@@ -1626,7 +1739,7 @@ bash -i <(curl -s https://raw.githubusercontent.com/RunOnFlux/fluxnode-multitool
 
 function multinode(){
 
-echo -e "${GREEN}Module: Multinode configuration with UPNP comunnication (Needs Router with UPNP support)${NC}"
+echo -e "${GREEN}Module: Multinode configuration with UPNP communication (Needs Router with UPNP support)${NC}"
 echo -e "${YELLOW}================================================================${NC}"
 
 if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
@@ -1639,11 +1752,11 @@ fi
     
     echo -e ""
     echo -e "${ARROW}  ${CYAN}OPTION ALLOWS YOU: ${NC}"
-    echo -e "${HOT} ${CYAN}Run node as selfhosting with upnp comunication ${NC}"
+    echo -e "${HOT} ${CYAN}Run node as selfhosting with upnp communication ${NC}"
     echo -e "${HOT} ${CYAN}Create up to 8 node using same public address ${NC}"
     echo -e ""
     echo -e "${ARROW}  ${RED}IMPORTANT:${NC}"
-    echo -e "${BOOK} ${RED}Each node need to set different port for comunnication${NC}"
+    echo -e "${BOOK} ${RED}Each node need to set different port for communication${NC}"
     echo -e "${BOOK} ${RED}If FluxOs fails to communicate with router or upnp fails it will shutdown FluxOS... ${NC}"
     echo -e ""
     echo -e "${YELLOW}================================================================${NC}"
@@ -1685,6 +1798,13 @@ if [[ $(lsb_release -d) != *Debian* && $(lsb_release -d) != *Ubuntu* ]]; then
 
 fi
 
+if [[ $(lsb_release -cs) == "jammy" ]]; then
+   echo -e "${WORNING} ${CYAN}ERROR: ${RED}OS version not supported${NC}"
+   echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
+   echo
+   exit
+fi
+
 usernew="$(whiptail --title "MULTITOOLBOX $dversion" --inputbox "Enter your username" 8 72 3>&1 1>&2 2>&3)"
 usernew=$(awk '{print tolower($0)}' <<< "$usernew")
 echo -e "${ARROW} ${CYAN}New User: ${GREEN}${usernew}${NC}"
@@ -1697,6 +1817,13 @@ then
 echo -e "${ARROW} ${YELLOW}Installing ufw firewall..${NC}"
 sudo apt-get install -y ufw > /dev/null 2>&1
 fi
+
+cron_check=$(systemctl status cron 2> /dev/null | grep 'active' | wc -l)
+if [[ "$cron_check" == "0" ]]; then
+echo -e "${ARROW} ${YELLOW}Installing crontab...${NC}"
+sudo apt-get install -y cron > /dev/null 2>&1
+fi
+
 echo -e "${ARROW} ${YELLOW}Installing docker...${NC}"
 echo -e "${ARROW} ${CYAN}Architecture: ${GREEN}$(dpkg --print-architecture)${NC}"
            
@@ -1803,7 +1930,7 @@ sleep 1
 
 if [[ "$zelnodeprivkey" == "" ]]; then
 skip_change=$((skip_change-1))
-echo -e "${ARROW} ${CYAN}Replace FluxNode public key skipped....................[${CHECK_MARK}${CYAN}]${NC}"
+echo -e "${ARROW} ${CYAN}Replace FluxNode identity key skipped....................[${CHECK_MARK}${CYAN}]${NC}"
 fi
 
 if [[ "$zelnodeoutpoint" == "" ]]; then
@@ -1836,11 +1963,11 @@ sudo fuser -k 16125/tcp > /dev/null 2>&1
 if [[ "$zelnodeprivkey" != "" ]]; then
 
 if [[ "zelnodeprivkey=$zelnodeprivkey" == $(grep -w zelnodeprivkey ~/$CONFIG_DIR/$CONFIG_FILE) ]]; then
-echo -e "${ARROW} ${CYAN}Replace FluxNode private key skipped....................[${CHECK_MARK}${CYAN}]${NC}"
+echo -e "${ARROW} ${CYAN}Replace FluxNode identity key skipped....................[${CHECK_MARK}${CYAN}]${NC}"
         else
         sed -i "s/$(grep -e zelnodeprivkey ~/$CONFIG_DIR/$CONFIG_FILE)/zelnodeprivkey=$zelnodeprivkey/" ~/$CONFIG_DIR/$CONFIG_FILE
                 if [[ "zelnodeprivkey=$zelnodeprivkey" == $(grep -w zelnodeprivkey ~/$CONFIG_DIR/$CONFIG_FILE) ]]; then
-                        echo -e "${ARROW} ${CYAN}FluxNode private key replaced successful................[${CHECK_MARK}${CYAN}]${NC}"			
+                        echo -e "${ARROW} ${CYAN}FluxNode identity key replaced successful................[${CHECK_MARK}${CYAN}]${NC}"			
                 fi
 fi
 
@@ -2214,7 +2341,13 @@ if [[ $1 == "ip_check" ]]; then
 
   get_ip
   device_name=$(ip addr | grep 'BROADCAST,MULTICAST,UP,LOWER_UP' | head -n1 | awk '{print $2}' | sed 's/://' | sed 's/@/ /' | awk '{print $1}')
-  confirmed_ip=$(curl -SsL --retry 5 -m 10 http://localhost:16127/flux/info | jq -r .data.node.status.ip)
+
+  api_port=$(grep -w apiport /home/$USER/zelflux/config/userconfig.js | grep -o '[[:digit:]]*')
+  if [[ "$api_port" == "" ]]; then
+  api_port="16127"
+  fi
+  
+  confirmed_ip=$(curl -SsL --retry 5 -m 10 http://localhost:$api_port/flux/info | jq -r .data.node.status.ip | sed -r 's/:.+//')
 
   if [[ "$WANIP" != "" && "$confirmed_ip" != "" ]]; then
 
@@ -2312,7 +2445,7 @@ echo -e "${CYAN}10 - Create Self-hosting cron ip service ${NC}"
 echo -e "${CYAN}11 - Replace Zel ID ${NC}"
 echo -e "${CYAN}12 - Install fluxwatchtower for docker images autoupdate${NC}"
 echo -e "${CYAN}13 - Recover corrupted MongoDB database${NC}"
-echo -e "${CYAN}14 - Multinode configuration with UPNP comunnication (Needs Router with UPNP support)  ${NC}"
+echo -e "${CYAN}14 - Multinode configuration with UPNP communication (Needs Router with UPNP support)  ${NC}"
 echo -e "${YELLOW}================================================================${NC}"
 
 read -rp "Pick an option and hit ENTER: "

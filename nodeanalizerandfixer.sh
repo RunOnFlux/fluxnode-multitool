@@ -156,6 +156,27 @@ sudo apt-get install lsof -y > /dev/null 2>&1 && sleep 2
 fi
 
 
+
+
+
+if [[ -f /home/$USER/.fluxbenchmark/fluxbench.conf ]]; then
+FluxAPI=$(grep -Po "\\d+" /home/$USER/.fluxbenchmark/fluxbench.conf)
+FLUXOS_CONFIG=$(grep -Po "$FluxAPI" /home/$USER/zelflux/config/userconfig.js)
+  if [[ "$FLUXOS_CONFIG" != "" ]]; then
+    FluxUI=$(($FluxAPI-1))
+    UPNP=1
+  else
+    FluxAPI=16127
+    FluxUI=16126
+    UPNP=0
+  fi
+else
+FluxAPI=16127
+FluxUI=16126
+UPNP=0
+fi
+
+
 if sudo lsof -i  -n | grep LISTEN | grep 27017 | grep mongod > /dev/null 2>&1; then
 echo -e "${CHECK_MARK} ${CYAN} Mongod listen on port 27017${NC}"
 else
@@ -186,21 +207,41 @@ else
 echo -e "${X_MARK} ${CYAN} Flux benchmark not listen${NC}"
 fi
 
-if sudo lsof -i  -n | grep LISTEN | grep 16126 | grep node > /dev/null 2>&1 
+if sudo lsof -i  -n | grep LISTEN | grep $FluxUI | grep node > /dev/null 2>&1 
 then
 ZELFLUX_PORT1="1"
 fi
 
-if sudo lsof -i  -n | grep LISTEN | grep 16127 | grep node > /dev/null 2>&1 
+if sudo lsof -i  -n | grep LISTEN | grep $FluxAPI | grep node > /dev/null 2>&1 
 then
 ZELFLUX_PORT2="1"
 fi
 
 if [[ "$ZELFLUX_PORT1" == "1" && "$ZELFLUX_PORT2" == "1"  ]]
 then
-echo -e "${CHECK_MARK} ${CYAN} Flux listen on ports 16126/16127${NC}"
+echo -e "${CHECK_MARK} ${CYAN} Flux listen on ports $FluxUI/$FluxAPI ${NC}"
 else
 echo -e "${X_MARK} ${CYAN} Flux not listen${NC}"
+fi
+
+echo -e ""
+echo -e "${BOOK} ${YELLOW}FluxOS networking: ${NC}"
+if [[ "$UPNP" == "1" ]]; then
+echo -e "${PIN} ${CYAN}UPnP MODE: ${GREEN}ENABLED${NC}"
+else
+echo -e "${PIN} ${CYAN}UPnP MODE: ${RED}DISABLED${NC}"
+fi
+echo -e "${PIN} ${CYAN}FluxAPI PORT: ${ORANGE}$FluxAPI ${NC}"
+echo -e "${PIN} ${CYAN}FluxUI PORT: ${ORANGE}$FluxUI ${NC}"
+
+if [[ -f /home/$USER/.pm2/logs/flux-out.log ]]; then
+error_check=$(tail -n10 /home/$USER/.pm2/logs/flux-out.log | grep "UPnP failed")
+  if [[ "$error_check" != "" ]]; then
+    echo -e ""
+    echo -e "${ARROW} ${YELLOW}Checking FluxOS logs... ${NC}"
+    echo -e "${WORNING} ${RED}Problem with UPnP detected, FluxOS Shutting down..."
+    echo -e ""
+  fi
 fi
 
 }
@@ -462,11 +503,11 @@ fi
 
 if [[ "$WANIP" != "" ]]; then
 
-back_error_check=$(curl -s -m 5 http://$WANIP:16127/zelid/loginphrase | jq -r .status )
+back_error_check=$(curl -s -m 5 http://$WANIP:$FluxAPI/zelid/loginphrase | jq -r .status )
 
   if [[ "$back_error_check" != "success" &&  "$back_error_check" != "" ]]; then
   
-        back_error=$(curl -s -m 8 http://$WANIP:16127/zelid/loginphrase | jq -r .data.message.message 2>/dev/null )
+        back_error=$(curl -s -m 8 http://$WANIP:$FluxAPI/zelid/loginphrase | jq -r .data.message.message 2>/dev/null )
 	
 	if [[ "$back_error" != "" ]]; then
 	
@@ -474,7 +515,7 @@ back_error_check=$(curl -s -m 5 http://$WANIP:16127/zelid/loginphrase | jq -r .s
 	  
         else
 	
-           back_error=$(curl -s -m 8 http://$WANIP:16127/zelid/loginphrase | jq -r .data.message 2>/dev/null )
+           back_error=$(curl -s -m 8 http://$WANIP:$FluxAPI/zelid/loginphrase | jq -r .data.message 2>/dev/null )
 	   
    	   if [[ "$back_error" != "" ]]; then  
 	   
@@ -568,7 +609,7 @@ fi
 echo -e "${PIN} ${CYAN}Node status: $node_status_color${NC}"
 
 if [[ "$node_status" == "DOS" ]]; then
-blocks_till=$($COIN_CLI  getdoslist | jq .[] | grep "$collateral" -A4 -B1 | jq .eligible_in)
+blocks_till=$($COIN_CLI  getdoslist | jq .[] | grep "$collateral" -A5 -B1 | jq .eligible_in)
 dos_till=$((blocks_hight+blocks_till))
 echo -e "${PIN} ${RED}DOS ${CYAN}Till: ${ORANGE}$dos_till ${CYAN}EXPIRE_COUNT: ${ORANGE}$blocks_till${CYAN} Time left: ${RED}~$((2*blocks_till)) min. ${NC}"
 fi
@@ -880,7 +921,7 @@ else
 echo -e "${X_MARK} ${CYAN} Pm2 is not installed${NC}"
 fi
 
-if [[ $(curl -s -m 5 --head "$WANIP:16126" | head -n 1 | grep "200 OK") ]]
+if [[ $(curl -s -m 5 --head "$WANIP:$FluxUI" | head -n 1 | grep "200 OK") ]]
 then
 echo -e "${CHECK_MARK} ${CYAN} Flux front is working${NC}"
 else
@@ -908,12 +949,12 @@ if [[ "$required_ver" != "" ]]; then
 echo -e "${CHECK_MARK} ${CYAN} Flux config  ~/$FLUX_DIR/config/userconfig.js exists${NC}"
 
 ZELIDLG=`echo -n $(grep -w zelid /home/$USER/$FLUX_DIR/config/userconfig.js | sed -e "s/'//g" | sed -e "s/,//g" | sed -e "s/.*zelid://g") | wc -m`
-if [ "$ZELIDLG" -eq "35" ] || [ "$ZELIDLG" -eq "34" ]; then
-echo -e "${CHECK_MARK} ${CYAN} Zel ID is valid${NC}"
+if [[ "$ZELIDLG" -eq "35" || "$ZELIDLG" -eq "34" || "$ZELIDLG" -eq "33" ]]; then
+ echo -e "${CHECK_MARK} ${CYAN} Zel ID is valid${NC}"
 elif [[ "$ZELIDLG" == "0" || "$ZELIDLG" == "2" ]]; then
-echo -e "${X_MARK} ${CYAN} Zel ID is missing...${NC}"
+ echo -e "${X_MARK} ${CYAN} Zel ID is missing...${NC}"
 else
-echo -e "${X_MARK} ${CYAN} Zel ID is not valid${NC}"
+ echo -e "${X_MARK} ${CYAN} Zel ID is not valid${NC}"
 fi
 
 if [ -f ~/$FLUX_DIR/error.log ]
@@ -953,26 +994,26 @@ echo
 echo -e "${BOOK} ${YELLOW}Checking ~/$CONFIG_DIR/$CONFIG_FILE${NC}"
 if [[ $zelnodeprivkey == $(grep -w zelnodeprivkey ~/$CONFIG_DIR/$CONFIG_FILE | sed -e 's/zelnodeprivkey=//') ]]
 then
-echo -e "${CHECK_MARK} ${CYAN} FluxNode privkey matches${NC}"
+echo -e "${CHECK_MARK} ${CYAN} FluxNode Identity Key matches${NC}"
 else
 REPLACE="1"
-echo -e "${X_MARK} ${CYAN} FluxNode privkey does not match${NC}"
+echo -e "${X_MARK} ${CYAN} FluxNode Identity Key does not match${NC}"
 fi
 
 if [[ $zelnodeoutpoint == $(grep -w zelnodeoutpoint ~/$CONFIG_DIR/$CONFIG_FILE | sed -e 's/zelnodeoutpoint=//') ]]
 then
-echo -e "${CHECK_MARK} ${CYAN} FluxNode outpoint matches${NC}"
+echo -e "${CHECK_MARK} ${CYAN} FluxNode Collateral TX ID matches${NC}"
 else
 REPLACE="1"
-echo -e "${X_MARK} ${CYAN} FluxNode outpoint does not match${NC}"
+echo -e "${X_MARK} ${CYAN} FluxNode Collateral TX ID does not match${NC}"
 fi
 
 if [[ $zelnodeindex == $(grep -w zelnodeindex ~/$CONFIG_DIR/$CONFIG_FILE | sed -e 's/zelnodeindex=//') ]]
 then
-echo -e "${CHECK_MARK} ${CYAN} FluxNode index matches${NC}"
+echo -e "${CHECK_MARK} ${CYAN} FluxNode Output Index matches${NC}"
 else
 REPLACE="1"
-echo -e "${X_MARK} ${CYAN} FluxNode index does not match${NC}"
+echo -e "${X_MARK} ${CYAN} FluxNode Output Index does not match${NC}"
 fi
 
 fi
@@ -1043,11 +1084,11 @@ if [[ "zelnodeprivkey=$zelnodeprivkey" == $(grep -w zelnodeprivkey ~/$CONFIG_DIR
 else
 	
   if [[ "$zelnodeprivkey" == "" ]]; then
-     echo -e " ${CYAN}FluxNode privkey skipped...............${NC}"
+     echo -e " ${CYAN}FluxNode Identity Key skipped...............${NC}"
   else
       sed -i "s/$(grep -e zelnodeprivkey ~/$CONFIG_DIR/$CONFIG_FILE)/zelnodeprivkey=$zelnodeprivkey/" ~/$CONFIG_DIR/$CONFIG_FILE
       if [[ "zelnodeprivkey=$zelnodeprivkey" == $(grep -w zelnodeprivkey ~/$CONFIG_DIR/$CONFIG_FILE) ]]; then
-           echo -e " ${CYAN}FluxNode privkey replaced successful...............[${CHECK_MARK}${CYAN}]${NC}"
+           echo -e " ${CYAN}FluxNode Identity Key replaced successful...............[${CHECK_MARK}${CYAN}]${NC}"
       fi
    fi
 fi
@@ -1058,11 +1099,11 @@ echo -e "\c"
         else
 	
      if [[ "$zelnodeoutpoint" == "" ]]; then
-       echo -e " ${CYAN}FluxNode zelnodeoutpoint skipped...............${NC}"
+       echo -e " ${CYAN}FluxNode Collateral TX ID skipped...............${NC}"
      else
         sed -i "s/$(grep -e zelnodeoutpoint ~/$CONFIG_DIR/$CONFIG_FILE)/zelnodeoutpoint=$zelnodeoutpoint/" ~/$CONFIG_DIR/$CONFIG_FILE
                 if [[ "zelnodeoutpoint=$zelnodeoutpoint" == $(grep -w zelnodeoutpoint ~/$CONFIG_DIR/$CONFIG_FILE) ]]; then
-                        echo -e " ${CYAN}FluxNode outpoint replaced successful...............[${CHECK_MARK}${CYAN}]${NC}"
+                        echo -e " ${CYAN}FluxNode Collateral TX ID replaced successful...............[${CHECK_MARK}${CYAN}]${NC}"
                 fi
      fi
 fi
@@ -1071,11 +1112,11 @@ echo -e "\c"
         else
 	
 	 if [[ "$zelnodeindex" == "" ]]; then
-          echo -e " ${CYAN}FluxNode zelnodeindex skipped...............${NC}"
+          echo -e " ${CYAN}FluxNode Output Index skipped...............${NC}"
          else
           sed -i "s/$(grep -w zelnodeindex ~/$CONFIG_DIR/$CONFIG_FILE)/zelnodeindex=$zelnodeindex/" ~/$CONFIG_DIR/$CONFIG_FILE
                 if [[ "zelnodeindex=$zelnodeindex" == $(grep -w zelnodeindex ~/$CONFIG_DIR/$CONFIG_FILE) ]]; then
-                        echo -e " ${CYAN}FluxNode index replaced successful...............[${CHECK_MARK}${CYAN}]${NC}"
+                        echo -e " ${CYAN}FluxNode Output Index replaced successful...............[${CHECK_MARK}${CYAN}]${NC}"
                 fi
 	 fi
 fi

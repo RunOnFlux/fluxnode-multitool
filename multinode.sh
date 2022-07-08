@@ -24,19 +24,6 @@ export NEWT_COLORS='
 title=black,
 '
 
-function get_ip(){
- WANIP=$(curl --silent -m 10 https://api4.my-ip.io/ip | tr -dc '[:alnum:].')
-
-  if [[ "$WANIP" == "" || "$WANIP" = *html* ]]; then
-   WANIP=$(curl --silent -m 10 https://checkip.amazonaws.com | tr -dc '[:alnum:].')
-  fi
-
-  if [[ "$WANIP" == "" || "$WANIP" = *html* ]]; then
-   WANIP=$(curl --silent -m 10 https://api.ipify.org | tr -dc '[:alnum:].')
-  fi
-}
-
-
 function string_limit_check_mark() {
 if [[ -z "$2" ]]; then
 string="$1"
@@ -73,9 +60,17 @@ echo -e "${ARROW} ${CYAN}$string[${X_MARK}${CYAN}]${NC}"
    sudo sed -i -e "/$line/a"$'\\\n'"$newText"$'\n' "$file"
 }
 
+
+
+function upnp_enable() {
+
 try="0"
-echo -e ""
-get_ip
+
+ if [[ ! -f /home/$USER/zelflux/config/userconfig.js ]]; then
+       echo -e "${WORNING} ${CYAN}Missing FluxOS configuration file - install/re-install Flux Node...${NC}" 
+       echo -e ""
+       exit
+ fi
 
   while true
      do
@@ -86,30 +81,18 @@ get_ip
 
            string_limit_check_mark "Port is valid..........................................."
            break
-           #echo -e "${ARROW}${YELLOW} Checking port availability.....${NC}"
-           #port_check=$(curl -s -m 5 http://$WANIP:$FLUX_PORT/id/loginphrase 2>/dev/null | jq -r .status 2>/dev/null )
-           #if [[ "$port_check" == "" && $(cat /home/$USER/zelflux/config/userconfig.js | grep "$FLUX_PORT") == "" ]]; then
-           #string_limit_check_mark "Port $FLUX_PORT is OK..........................................."
-           #break    
-           #else
-           #string_limit_x_mark "Port $FLUX_PORT is already in use..............................."
-           #sleep 1
-           #try=$(($try+1))
-           #if [[ "$try" -gt "3" ]]; then
-           #echo -e "${WORNING} ${CYAN}You have reached the maximum number of try...${NC}" 
-           #echo -e ""
-           #exit
-           #fi
-           #fi        
+     
          else
+
            string_limit_x_mark "Port $FLUX_PORT is not allowed..............................."
            sleep 1
            try=$(($try+1))
            if [[ "$try" -gt "3" ]]; then
-             echo -e "${WORNING} ${CYAN}You have reached the maximum number of try...${NC}" 
+             echo -e "${WORNING} ${CYAN}You have reached the maximum number of attempts...${NC}" 
              echo -e ""
              exit
           fi
+
         fi
     done
 
@@ -118,13 +101,13 @@ if [[ $(cat /home/$USER/zelflux/config/userconfig.js | grep "apiport") != "" ]];
   sed -i "s/$(grep -e apiport /home/$USER/zelflux/config/userconfig.js)/apiport: '$FLUX_PORT',/" /home/$USER/zelflux/config/userconfig.js
 
   if [[ $(grep -w $FLUX_PORT /home/$USER/zelflux/config/userconfig.js) != "" ]]; then
-     echo -e "${ARROW} ${CYAN}FluxOS port replaced successful...................[${CHECK_MARK}${CYAN}]${NC}"
+     echo -e "${ARROW} ${CYAN}FluxOS port replaced successfully...................[${CHECK_MARK}${CYAN}]${NC}"
   fi
 
 else
 
    insertAfter "/home/$USER/zelflux/config/userconfig.js" "zelid" "apiport: '$FLUX_PORT',"
-   echo -e "${ARROW} ${CYAN}FluxOS port set successful........................[${CHECK_MARK}${CYAN}]${NC}"
+   echo -e "${ARROW} ${CYAN}FluxOS port set successfully........................[${CHECK_MARK}${CYAN}]${NC}"
 
 fi
 
@@ -132,40 +115,70 @@ if [[ -d /home/$USER/.fluxbenchmark ]]; then
   sudo mkdir -p /home/$USER/.fluxbenchmark 2>/dev/null
   echo "fluxport=$FLUX_PORT" | sudo tee "/home/$USER/.fluxbenchmark/fluxbench.conf" > /dev/null
 else
-  echo "fluxport=$$FLUX_PORT" | sudo tee "/home/$USER/.fluxbenchmark/fluxbench.conf" > /dev/null
+  echo "fluxport=$FLUX_PORT" | sudo tee "/home/$USER/.fluxbenchmark/fluxbench.conf" > /dev/null
 fi
 
 if [[ -f /home/$USER/.fluxbenchmark/fluxbench.conf ]]; then
-  echo -e "${ARROW} ${CYAN}Fluxbench port set successful.....................[${CHECK_MARK}${CYAN}]${NC}"
+  echo -e "${ARROW} ${CYAN}Fluxbench port set successfully.....................[${CHECK_MARK}${CYAN}]${NC}"
   echo -e "${ARROW} ${YELLOW}Restarting FluxOS and Benchmark.....${NC}"
+  #API PORT
   sudo ufw allow $FLUX_PORT > /dev/null 2>&1
+  #HOME UI PORT
+  sudo ufw allow $(($FLUX_PORT-1)) > /dev/null 2>&1
+  
   
   #if ! route -h > /dev/null 2>&1 ; then
   # sudo apt install net-tools > /dev/null 2>&1
   #fi  
   
   #router_ip=$(route -n | sed -nr 's/(0\.0\.0\.0) +([^ ]+) +\1.*/\2/p' 2>/dev/null)
-   router_ip=$(ip rout | head -n1 | awk '{print $3}' 2>/dev/null)
+  router_ip=$(ip rout | head -n1 | awk '{print $3}' 2>/dev/null)
   
   if [[ "$router_ip" != "" ]]; then
   
-    sudo ufw allow out from any to 239.255.255.250 port 1900 proto udp > /dev/null 2>&1
-    sudo ufw allow from $router_ip port 1900 to any proto udp > /dev/null 2>&1
-    sudo ufw allow out from any to $router_ip proto tcp > /dev/null 2>&1
-    sudo ufw allow from $router_ip to any proto udp > /dev/null 2>&1
+  
+    if (whiptail --yesno "Is your router's IP $router_ip ?" 8 70); then
+      sudo ufw allow out from any to 239.255.255.250 port 1900 proto udp > /dev/null 2>&1
+      sudo ufw allow from $router_ip port 1900 to any proto udp > /dev/null 2>&1
+      sudo ufw allow out from any to $router_ip proto tcp > /dev/null 2>&1
+      sudo ufw allow from $router_ip to any proto udp > /dev/null 2>&1
+    else
+      
+      
+        while true  
+        do
+          
+          router_ip=$(whiptail --inputbox "Enter your router's IP" 8 60 3>&1 1>&2 2>&3)
+   
+          if [[ "$router_ip" =~ ^(([1-9]?[0-9]|1[0-9][0-9]|2([0-4][0-9]|5[0-5]))\.){3}([1-9]?[0-9]|1[0-9][0-9]|2([0-4][0-9]|5[0-5]))$ ]]; then
+             echo -e "${ARROW} ${CYAN}IP $router_ip format is valid........................[${CHECK_MARK}${CYAN}]${NC}"
+             break
+          else
+            string_limit_x_mark "IP $router_ip is not valid ..............................."
+            sleep 1
+          fi
+      
+        done
+    
+       sudo ufw allow out from any to 239.255.255.250 port 1900 proto udp > /dev/null 2>&1
+       sudo ufw allow from $router_ip port 1900 to any proto udp > /dev/null 2>&1
+       sudo ufw allow out from any to $router_ip proto tcp > /dev/null 2>&1
+       sudo ufw allow from $router_ip to any proto udp > /dev/null 2>&1
+       
+    fi
   
   else
    
     while true  
     do
     
-      router_ip=$(whiptail --inputbox "Enter your router IP" 8 60 3>&1 1>&2 2>&3)
+      router_ip=$(whiptail --inputbox "Enter your router's IP" 8 60 3>&1 1>&2 2>&3)
    
        if [[ "$router_ip" =~ ^(([1-9]?[0-9]|1[0-9][0-9]|2([0-4][0-9]|5[0-5]))\.){3}([1-9]?[0-9]|1[0-9][0-9]|2([0-4][0-9]|5[0-5]))$ ]]; then
           echo -e "${ARROW} ${CYAN}IP $router_ip format is valid........................[${CHECK_MARK}${CYAN}]${NC}"
           break
        else
-         string_limit_x_mark "IP $router_ip is not a valid ..............................."
+         string_limit_x_mark "IP $router_ip is not valid ..............................."
          sleep 1
        fi
       
@@ -182,7 +195,64 @@ fi
 
   sudo systemctl restart zelcash  > /dev/null 2>&1
   pm2 restart flux  > /dev/null 2>&1
-  sleep 180
-  echo -e ""
-  echo -e "${PIN} ${CYAN}To access your frontend to Flux enter this in as your url: ${SEA}http://${WANIP}:$(($FLUX_PORT-1))${NC}"
+  sleep 200
+  echo -e "${ARROW}${YELLOW} Checking FluxOS logs... ${NC}"
+  error_check=$(tail -n10 /home/$USER/.pm2/logs/flux-out.log | grep "UPnP failed")
+  
+  if [[ "$error_check" == "" ]]; then
+    echo -e ""
+    LOCAL_IP=$(ip -o route get to 8.8.8.8 | sed -n 's/.*src \([0-9.]\+\).*/\1/p')
+    echo -e "${PIN} ${CYAN}To access your FluxOS use this url: ${SEA}http://${LOCAL_IP}:$(($FLUX_PORT-1))${NC}"
+    echo -e ""
+  else
+    echo -e "${WORNING} ${RED}Problem with UPnP detected, FluxOS Shutting down...${NC}"
+    echo -e ""
+  fi
 
+}
+
+function upnp_disable() {
+
+ if [[ ! -f /home/$USER/zelflux/config/userconfig.js ]]; then
+       echo -e "${WORNING} ${CYAN}Missing FluxOS configuration file - install/re-install Flux Node...${NC}" 
+       echo -e ""
+       exit
+ fi
+ 
+ if [[ -f /home/$USER/.fluxbenchmark/fluxbench.conf ]]; then
+ echo -e "${ARROW} ${CYAN}Removing FluxOS UPnP configuration.....${NC}"
+ sudo rm -rf /home/$USER/.fluxbenchmark/fluxbench.conf
+ else
+   echo -e "${ARROW} ${YELLOW}UPnP Mode is already disabled...${NC}"
+   echo -e ""
+   exit
+ fi
+
+ if [[ $(cat /home/$USER/zelflux/config/userconfig.js | grep 'apiport' | wc -l) == "1" ]]; then
+  cat /home/$USER/zelflux/config/userconfig.js | sed '/apiport/d' | sudo tee "/home/$USER/zelflux/config/userconfig.js" > /dev/null
+ fi
+
+ echo -e "${ARROW} ${YELLOW}Restarting FluxOS and Benchmark.....${NC}"
+ echo -e ""
+ sudo systemctl restart zelcash  > /dev/null 2>&1
+ pm2 restart flux  > /dev/null 2>&1
+ sleep 200
+
+}
+
+
+ CHOICE=$(
+whiptail --title "UPnP Configuration" --menu "Make your choice" 16 30 9 \
+"1)" "Enable UPnP Mode"   \
+"2)" "Disable UPnP Mode"  3>&2 2>&1 1>&3
+)
+
+
+case $CHOICE in
+	"1)")   
+         upnp_enable
+	;;
+	"2)")   
+	 upnp_disable
+	;;
+esac
