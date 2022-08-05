@@ -1,8 +1,14 @@
 #!/bin/bash
 
-ROOT_BRANCH="master"
-if ! [ -z "$1" ]; then
-    ROOT_BRANCH="$1"
+if ! [[ -z $1 ]]; then
+    if [[ $BRANCH_ALREADY_REFERENCED != '1' ]]; then
+        export ROOT_BRANCH="$1"
+        export BRANCH_ALREADY_REFERENCED='1'
+        bash -i <(curl -s https://raw.githubusercontent.com/RunOnFlux/fluxnode-multitool/$ROOT_BRANCH/multitoolbox_testnet.sh) $ROOT_BRANCH
+        exit
+    fi
+else
+    ROOT_BRANCH='master'
 fi
 
 BOOTSTRAP_ZIP='https://fluxnodeservice.com/daemon_bootstrap.tar.gz'

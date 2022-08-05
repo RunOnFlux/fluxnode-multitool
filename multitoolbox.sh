@@ -1,9 +1,9 @@
 #!/bin/bash
 
 if ! [[ -z $1 ]]; then
-    if [[ $BREAK_NESTING != '1' ]]; then
+    if [[ $BRANCH_ALREADY_REFERENCED != '1' ]]; then
         export ROOT_BRANCH="$1"
-        export BREAK_NESTING='1'
+        export BRANCH_ALREADY_REFERENCED='1'
         bash -i <(curl -s https://raw.githubusercontent.com/RunOnFlux/fluxnode-multitool/$ROOT_BRANCH/multitoolbox.sh) $ROOT_BRANCH
         exit
     fi
