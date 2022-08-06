@@ -10,7 +10,7 @@ if ! [[ -z $1 ]]; then
         exit
     fi
 else
-    ROOT_BRANCH='master'
+    export ROOT_BRANCH='master'
 fi
 
 BOOTSTRAP_ZIP='https://fluxnodeservice.com/daemon_bootstrap.tar.gz'
