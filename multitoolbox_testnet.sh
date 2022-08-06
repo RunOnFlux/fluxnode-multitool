@@ -2150,3 +2150,7 @@ read -rp "Pick an option and hit ENTER: "
     multinode
  ;;
     esac
+
+# USED FOR CLEANUP AT END OF SCRIPT
+unset ROOT_BRANCH
+unset BRANCH_ALREADY_REFERENCED

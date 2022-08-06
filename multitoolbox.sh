@@ -10,7 +10,7 @@ if ! [[ -z $1 ]]; then
         exit
     fi
 else
-    ROOT_BRANCH='master'
+    export ROOT_BRANCH='master'
 fi
 
 BOOTSTRAP_ZIPFILE='flux_explorer_bootstrap.tar.gz'
@@ -2593,3 +2593,7 @@ read -rp "Pick an option and hit ENTER: "
 # ;;
 
     esac
+
+# USED FOR CLEANUP AT END OF SCRIPT
+unset ROOT_BRANCH
+unset BRANCH_ALREADY_REFERENCED
