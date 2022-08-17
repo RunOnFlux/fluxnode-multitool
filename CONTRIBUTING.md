@@ -24,4 +24,4 @@ please check out this [video](https://www.youtube.com/watch?v=TKJ4RdhyB5Y)
 
 ## Pull Requests
 **Working on your first Pull Request?** <br>
-[How to Contribute to an Open Source Project on GitHub]([https://egghead.io/series/how-to-contribute-to-an-open-source-project-on-github](https://www.youtube.com/watch?v=nT8KGYVurIU))
+You can use [this as your starting point](https://www.youtube.com/watch?v=nT8KGYVurIU&t=2s)
