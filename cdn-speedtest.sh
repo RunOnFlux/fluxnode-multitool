@@ -20,7 +20,7 @@ HOT="${ORANGE}\xF0\x9F\x94\xA5${NC}"
 WORNING="${RED}\xF0\x9F\x9A\xA8${NC}"
 RIGHT_ANGLE="${GREEN}\xE2\x88\x9F${NC}"
 
-#allow user input for download time between 4 and 10 seconds - might help stabalize connection
+#allow user input for download time between 4 and 10 seconds - might help stabilize connection
 if [ -z "$1" ]; then
   downloadtime='4'
 elif [[ $1 -lt 10 && $1 -ge 4 ]]; then
