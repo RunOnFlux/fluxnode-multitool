@@ -2,9 +2,8 @@
 
 ## General Information <br>
 This page contains all information needed to contribute to this project, and other resources will be listed here as they come up.
-<br><br>
 
-Please, if you need help, don't be afraid to ask in our [discord](https://discord.io/runonflux)<br><br>
+**Please, if you need help, don't be afraid to ask in our** [discord](https://discord.io/runonflux)<br><br>
 
 ## Reporting Bugs / Requesting Features <br>
 If you found a bug or want to request a feature, please submit it in [issues](https://github.com/RunOnFlux/fluxnode-multitool/issues) <br> <br>
