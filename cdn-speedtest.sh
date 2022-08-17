@@ -29,7 +29,7 @@ else
     downloadtime='4'
 fi
 
-#array of available servers
+#array of available bootstrap server IDs
 rand_by_domain=("5" "6" "7" "8" "9" "10" "11" "12")
 size_list=()
 i=0
