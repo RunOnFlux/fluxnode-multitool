@@ -22,6 +22,6 @@ Here's more info on the [gherkin syntax](https://cucumber.io/docs/gherkin/)
 **If you need help submitting an issue**<br>
 please check out this [video](https://www.youtube.com/watch?v=TKJ4RdhyB5Y)
 
-## Pull Requests
+## Pull Requests<br><br>
 **Working on your first Pull Request?** <br>
-You can use [this as your starting point](https://www.youtube.com/watch?v=nT8KGYVurIU&t=2s)
+[You can use this as your starting point](https://www.youtube.com/watch?v=nT8KGYVurIU&t=2s)
