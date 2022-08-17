@@ -6,7 +6,7 @@
 ## Reporting Bugs / Requesting Features <br>
 If you found a bug or want to request a feature, please submit it in [issues] <br> 
 (https://github.com/RunOnFlux/fluxnode-multitool/issues) <br> <br>
-Please submit issues using the gherkin syntax for clear understanding of issue. <br>
+**Please submit issues using the gherkin syntax for clear understanding of issue.** <br>
 
 Given [some context]<br>
 When [certain action is taken]<br>
