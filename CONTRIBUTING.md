@@ -5,11 +5,12 @@
 
 ## Reporting Bugs / Requesting Features <br>
 If you found a bug or want to request a feature, please submit it in [issues] <br> 
-(https://github.com/RunOnFlux/fluxnode-multitool/issues)<br> <br>
-Please submit issues using the gherkin syntax for clear understanding of issue.<br>
-''' Given [the counter has advanced to 5]
-When [I call reset on the service and i request the current counter]
-Then [I should see 0 returned from the service]'''<br><br>
+(https://github.com/RunOnFlux/fluxnode-multitool/issues) <br> <br>
+Please submit issues using the gherkin syntax for clear understanding of issue. <br> <br>
+Given [the counter has advanced to 5]<br>
+When [I call reset on the service and i request the current counter]<br>
+Then [I should see 0 returned from the service]<br><br>
+
 Here's more info on the gerkin syntax(https://cucumber.io/docs/gherkin/)
 
 **If you need help submitting an issue**<br>
