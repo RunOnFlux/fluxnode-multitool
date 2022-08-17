@@ -1,9 +1,9 @@
 # MULTITOOLBOX FOR FLUXNODE OPERATORS
 
-<b>1) HOW RUN SCRIPT</b>  
+<b>1) HOW RUN SCRIPT</b> <br>  
 ```bash -i <(curl -s https://raw.githubusercontent.com/RunOnFlux/fluxnode-multitool/master/multitoolbox.sh)```  
 
-<b>2) MENU:</b>    
+<b>2) MENU:</b> <br>
 ![screen1](https://raw.githubusercontent.com/RunOnFlux/fluxnode-multitool/master/image/update_menu.png) 
 
 <b>3) HOW USE MULTITOOLBOX TO SETUP FLUXNODE:</b>  
