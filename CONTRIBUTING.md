@@ -12,7 +12,7 @@ Given [some context]<br>
 When [certain action is taken]<br>
 Then [the outcome of action is observed] <br><br>
 
-**Example** <br><br>
+**Example** <br>
 
 Given [the counter has advanced to 5]<br>
 When [I call reset on the service and i request the current counter]<br>
