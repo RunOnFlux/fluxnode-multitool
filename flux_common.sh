@@ -310,10 +310,13 @@ function get_ip(){
 }
 
 function selfhosting() {
- 
+  
     echo -e "${ARROW} ${YELLOW}Creating cron service for ip rotate...${NC}"
     echo -e "${ARROW} ${CYAN}Adding IP for device...${NC}" && sleep 1
+    #added call to get_ip function - when calling option 10 this wasn't called anywhere else so WANIP is always empty
+    get_ip
     device_name=$(ip addr | grep 'BROADCAST,MULTICAST,UP,LOWER_UP' | head -n1 | awk '{print $2}' | sed 's/://' | sed 's/@/ /' | awk '{print $1}')
+    
 
     if [[ "$device_name" != "" && "$WANIP" != "" ]]; then
         sudo ip addr add $WANIP dev $device_name:0  > /dev/null 2>&1
