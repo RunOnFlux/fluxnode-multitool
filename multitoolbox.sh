@@ -1,15 +1,7 @@
 #!/bin/bash
 
-trap ctrl_c INT
-
-function ctrl_c() {
-	echo -e ""
-	echo -e " Cleaning branch variable..."
-	echo -e ""
-	unset ROOT_BRANCH
-	unset BRANCH_ALREADY_REFERENCE
-	exit
-}
+#disable terminal history while inside of app
+set +o history
 
 if ! [[ -z $1 ]]; then
 	if [[ $BRANCH_ALREADY_REFERENCED != '1' ]]; then
@@ -18,12 +10,18 @@ if ! [[ -z $1 ]]; then
 	bash -i <(curl -s https://raw.githubusercontent.com/RunOnFlux/fluxnode-multitool/$ROOT_BRANCH/multitoolbox.sh) $ROOT_BRANCH
 	unset ROOT_BRANCH
 	unset BRANCH_ALREADY_REFERENCED
-	exit
+	toolbox_close
 	fi
 else
 	export ROOT_BRANCH='master'
 fi
 source /dev/stdin <<< "$(curl -s https://raw.githubusercontent.com/RunOnFlux/fluxnode-multitool/$ROOT_BRANCH/flux_common.sh)"
+
+trap ctrl_c INT
+function ctrl_c() {
+	toolbox_close
+}
+
 if [[ -d /home/$USER/.zelcash ]]; then
 	CONFIG_DIR='.zelcash'
 	CONFIG_FILE='zelcash.conf'
@@ -50,7 +48,7 @@ function config_veryfity(){
 			echo -e "${WORNING} ${CYAN}Insightexplorer disabled.............[${X_MARK}${CYAN}]${NC}"
 			echo -e "${WORNING} ${CYAN}Use option 2 for node re-install${NC}"
 			echo -e ""
-			exit
+			toolbox_close
 		fi
 	fi
 }
@@ -114,7 +112,7 @@ function install_flux() {
 		echo -e "${CYAN}Please switch to the user account.${NC}"
 		echo -e "${YELLOW}================================================================${NC}"
 		echo -e "${NC}"
-		exit
+		toolbox_close
 	fi
 
 	if pm2 -v > /dev/null 2>&1; then
@@ -183,13 +181,13 @@ function install_flux() {
 		else
 			string_limit_x_mark "FluxOS was not downloaded, run script again..........................................."
 			echo
-			exit
+			toolbox_close
 		fi
 		string_limit_check_mark "FluxOS v$current_ver downloaded..........................................." "FluxOS ${GREEN}v$current_ver${CYAN} downloaded..........................................."
 	else
 		string_limit_x_mark "FluxOS was not downloaded, run script again..........................................."
 		echo
-		exit
+		toolbox_close
 	fi
 
 	if [[ "$zelflux_setting_import" == "0" ]]; then
@@ -226,7 +224,7 @@ function install_flux() {
 	else
 		string_limit_x_mark "FluxOS installation failed, missing config file..........................................."
 		echo
-		exit
+		toolbox_close
 	fi
 
 	if pm2 -v > /dev/null 2>&1; then 
@@ -256,7 +254,7 @@ function create_config() {
 		echo -e "${CYAN}Please switch to the user account.${NC}"
 		echo -e "${YELLOW}================================================================${NC}"
 		echo -e "${NC}"
-		exit
+		toolbox_close
 	fi
 	echo -e "${GREEN}Module: Create FluxNode installation config file${NC}"
 	echo -e "${YELLOW}================================================================${NC}"
@@ -273,7 +271,7 @@ function create_config() {
 			#echo -e "${ARROW} ${CYAN}Nodejs was not installed${NC}"
 			string_limit_x_mark "JQ was not installed................................."
 			echo
-			exit
+			toolbox_close
 		fi
 	fi
 	skip_zelcash_config='0'
@@ -516,14 +514,14 @@ function install_watchdog() {
 		echo -e "${CYAN}Please switch to the user account.${NC}"
 		echo -e "${YELLOW}================================================================${NC}"
 		echo -e "${NC}"
-		exit
+		toolbox_close
 	fi
 	echo -e "${GREEN}Module: Install watchdog for FluxNode${NC}"
 	echo -e "${YELLOW}================================================================${NC}"
 	if ! pm2 -v > /dev/null 2>&1; then
 		pm2_install
 		if [[ "$PM2_INSTALL" == "0" ]]; then
-			exit
+			toolbox_close
 		fi
 		echo -e ""
 	fi
@@ -708,7 +706,7 @@ function flux_daemon_bootstrap() {
 		echo -e "${CYAN}Please switch to the user account.${NC}"
 		echo -e "${YELLOW}================================================================${NC}"
 		echo -e "${NC}"
-		exit
+		toolbox_close
 	fi
 	cd
 	echo -e "${NC}"
@@ -723,25 +721,25 @@ function install_node(){
 		echo -e "${CYAN}Please switch to the user account.${NC}"
 		echo -e "${YELLOW}================================================================${NC}"
 		echo -e "${NC}"
-		exit
+		toolbox_close
 	fi
 	if [[ $(lsb_release -d) != *Debian* && $(lsb_release -d) != *Ubuntu* ]]; then
 		echo -e "${WORNING} ${CYAN}ERROR: ${RED}OS version not supported${NC}"
 		echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
 		echo
-		exit
+		toolbox_close
 	fi
 	if [[ $(lsb_release -cs) == "jammy" ]]; then
 		echo -e "${WORNING} ${CYAN}ERROR: ${RED}OS version not supported${NC}"
 		echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
 		echo
-		exit
+		toolbox_close
 	fi
 	if sudo docker run hello-world > /dev/null 2>&1; then
 		echo -e ""
 	else
 		echo -e "${WORNING}${CYAN}Docker is not working correct or is not installed.${NC}"
-		exit
+		toolbox_close
 	fi
 	bash -i <(curl -s https://raw.githubusercontent.com/RunOnFlux/fluxnode-multitool/${ROOT_BRANCH}/install_pro.sh)
 }
@@ -753,19 +751,19 @@ function install_docker(){
 		echo -e "${CYAN}Please switch to the root account use command 'sudo su -'.${NC}"
 		echo -e "${YELLOW}================================================================${NC}"
 		echo -e "${NC}"
-		exit
+		toolbox_close
 	fi
 	if [[ $(lsb_release -d) != *Debian* && $(lsb_release -d) != *Ubuntu* ]]; then
 		echo -e "${WORNING} ${CYAN}ERROR: ${RED}OS version not supported${NC}"
 		echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
 		echo
-		exit
+		toolbox_close
 	fi
 	if [[ $(lsb_release -cs) == "jammy" ]]; then
 		echo -e "${WORNING} ${CYAN}ERROR: ${RED}OS version not supported${NC}"
 		echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
 		echo
-		exit
+		toolbox_close
 	fi
 	if [[ -z "$usernew" ]]; then
 		usernew="$(whiptail --title "MULTITOOLBOX $dversion" --inputbox "Enter your username" 8 72 3>&1 1>&2 2>&3)"
@@ -849,7 +847,7 @@ function install_watchtower(){
 		echo -e "${CYAN}Please switch to the user account.${NC}"
 		echo -e "${YELLOW}================================================================${NC}"
 		echo -e "${NC}"
-		exit
+		toolbox_close
 	fi 
 	echo -e ""
 	echo -e "${ARROW} ${CYAN}Checking if flux_watchtower is installed....${NC}"
@@ -887,7 +885,7 @@ function mongod_db_fix() {
 		echo -e "${CYAN}Please switch to the user account.${NC}"
 		echo -e "${YELLOW}================================================================${NC}"
 		echo -e "${NC}"
-		exit
+		toolbox_close
 	fi 
 
 
@@ -1141,7 +1139,7 @@ case "$REPLY" in
 		echo -e "${CYAN}Please switch to the user account.${NC}"
 		echo -e "${YELLOW}================================================================${NC}"
 		echo -e "${NC}"
-		exit
+		toolbox_close
 	fi
 	node_reconfiguration
 	echo -e ""

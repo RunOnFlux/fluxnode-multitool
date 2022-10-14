@@ -128,7 +128,7 @@ if [[ "$USER" == "root" || "$USER" == "ubuntu" ]]; then
     echo -e "${CYAN}Please switch to the user account.${NC}"
     echo -e "${YELLOW}================================================================${NC}"
     echo -e "${NC}"
-    exit
+    toolbox_close
 fi
 
  if pm2 -v > /dev/null 2>&1; then
@@ -218,14 +218,14 @@ if [[ -f /home/$USER/$FLUX_DIR/package.json ]]; then
 else
   string_limit_x_mark "Flux was not downloaded, run script again..........................................."
   echo
-  exit
+  toolbox_close
 fi
 
 string_limit_check_mark "Flux v$current_ver downloaded..........................................." "Flux ${GREEN}v$current_ver${CYAN} downloaded..........................................."
 else
 string_limit_x_mark "Flux was not downloaded, run script again..........................................."
 echo
-exit
+toolbox_close
 fi
 
 
@@ -296,7 +296,7 @@ string_limit_check_mark "Flux configuration successfull.........................
 else
 string_limit_x_mark "Flux installation failed, missing config file..........................................."
 echo
-exit
+toolbox_close
 fi
 
  if pm2 -v > /dev/null 2>&1; then 
@@ -331,7 +331,7 @@ if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
     echo -e "${CYAN}Please switch to the user account.${NC}"
     echo -e "${YELLOW}================================================================${NC}"
     echo -e "${NC}"
-    exit
+    toolbox_close
 fi
 
 echo -e "${GREEN}Module: Create FluxNode installation config file${NC}"
@@ -353,7 +353,7 @@ sudo apt  install jq -y > /dev/null 2>&1
     #echo -e "${ARROW} ${CYAN}Nodejs was not installed${NC}"
     string_limit_x_mark "JQ was not installed................................."
     echo
-    exit
+    toolbox_close
   fi
 fi
 
@@ -421,7 +421,7 @@ sleep 1
 else
 echo -e "${ARROW} ${CYAN}SSH port must be integer.................................[${X_MARK}${CYAN}]${NC}"
 echo
-exit
+toolbox_close
 fi
 
 
@@ -515,7 +515,7 @@ if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
     echo -e "${CYAN}Please switch to the user account.${NC}"
     echo -e "${YELLOW}================================================================${NC}"
     echo -e "${NC}"
-    exit
+    toolbox_close
 fi
 
 echo -e "${GREEN}Module: Install watchdog for FluxNode${NC}"
@@ -525,7 +525,7 @@ if ! pm2 -v > /dev/null 2>&1
 then
 pm2_install
  if [[ "$PM2_INSTALL" == "0" ]]; then
-   exit
+   toolbox_close
  fi
 echo -e ""
 fi
@@ -777,7 +777,7 @@ function flux_daemon_bootstrap() {
         echo -e "${CYAN}Please switch to the user account.${NC}"
         echo -e "${YELLOW}================================================================${NC}"
         echo -e "${NC}"
-        exit
+        toolbox_close
     fi
 
     cd
@@ -904,7 +904,7 @@ if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
     echo -e "${CYAN}Please switch to the user account.${NC}"
     echo -e "${YELLOW}================================================================${NC}"
     echo -e "${NC}"
-    exit
+    toolbox_close
 fi
 
 if [[ $(lsb_release -d) != *Debian* && $(lsb_release -d) != *Ubuntu* ]]; then
@@ -912,7 +912,7 @@ if [[ $(lsb_release -d) != *Debian* && $(lsb_release -d) != *Ubuntu* ]]; then
    echo -e "${WORNING} ${CYAN}ERROR: ${RED}OS version not supported${NC}"
    echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
    echo
-   exit
+   toolbox_close
 fi
 
 
@@ -921,7 +921,7 @@ then
 echo -e ""
 else
 echo -e "${WORNING}${CYAN}Docker is not working correct or is not installed.${NC}"
-exit
+toolbox_close
 fi
 
 
@@ -942,7 +942,7 @@ if [[ "$USER" != "root" ]]; then
     echo -e "${CYAN}Please switch to the root account use command 'su -'.${NC}"
     echo -e "${YELLOW}================================================================${NC}"
     echo -e "${NC}"
-    exit
+    toolbox_close
 fi
 
 
@@ -952,7 +952,7 @@ if [[ $(lsb_release -d) != *Debian* && $(lsb_release -d) != *Ubuntu* ]]; then
     echo -e "${WORNING} ${CYAN}ERROR: ${RED}OS version not supported${NC}"
     echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
     echo
-    exit
+    toolbox_close
 
 fi
 
@@ -1054,7 +1054,7 @@ if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
     echo -e "${CYAN}Please switch to the user account.${NC}"
     echo -e "${YELLOW}================================================================${NC}"
     echo -e "${NC}"
-    exit
+    toolbox_close
 fi
 
 echo
@@ -1094,7 +1094,7 @@ fi
 if [[ "$skip_change" == "0" ]]; then
 echo -e "${ARROW} ${YELLOW}All fields are empty changes skipped...${NC}"
 echo
-exit
+toolbox_close
 fi
 
 echo -e "${ARROW} ${CYAN}Stopping Flux daemon service...${NC}"
@@ -1176,7 +1176,7 @@ echo -e "" && echo -e ""
     echo -e "${CYAN}Please switch to the user account.${NC}"
     echo -e "${YELLOW}================================================================${NC}"
     echo -e "${NC}"
-    exit
+    toolbox_close
   fi 
  
 
@@ -1234,7 +1234,7 @@ fi
     echo -e "${CYAN}Please switch to the user account.${NC}"
     echo -e "${YELLOW}================================================================${NC}"
     echo -e "${NC}"
-    exit
+    toolbox_close
   fi 
  
   echo -e ""

@@ -5,7 +5,7 @@ function upnp_disable() {
  if [[ ! -f /home/$USER/zelflux/config/userconfig.js ]]; then
 		echo -e "${WORNING} ${CYAN}Missing FluxOS configuration file - install/re-install Flux Node...${NC}" 
 		echo -e ""
-		exit
+		toolbox_close
  fi
  if [[ -f /home/$USER/.fluxbenchmark/fluxbench.conf ]]; then
  echo -e ""
@@ -14,7 +14,7 @@ function upnp_disable() {
  else
 	 echo -e "${ARROW} ${CYAN}UPnP Mode is already disabled...${NC}"
 	 echo -e ""
-	 exit
+	 toolbox_close
  fi
  if [[ $(cat /home/$USER/zelflux/config/userconfig.js | grep 'apiport' | wc -l) == "1" ]]; then
 	cat /home/$USER/zelflux/config/userconfig.js | sed '/apiport/d' | sudo tee "/home/$USER/zelflux/config/userconfig.js" > /dev/null

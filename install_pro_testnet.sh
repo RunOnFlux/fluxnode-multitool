@@ -602,7 +602,7 @@ function ssh_port() {
 	else
 	 echo -e "${ARROW} ${CYAN}SSH port must be integer................[${X_MARK}${CYAN}]${NC}}"
 	 echo
-	 exit
+	 toolbox_close
 	fi	   
     fi
 }
@@ -623,11 +623,9 @@ function ip_confirm() {
         
     if [[ "$WANIP" == "" ]]; then
       	echo -e "${ARROW} ${CYAN}IP address could not be found, installation stopped .........[${X_MARK}${CYAN}]${NC}"
-	echo
-	exit
+				echo
+				toolbox_close
     fi
-	 
-	 
    string_limit_check_mark "Detected IP: $WANIP ................................." "Detected IP: ${GREEN}$WANIP${CYAN} ................................."
     
 }
@@ -730,7 +728,7 @@ else
      echo -e "${WORNING} ${RED}Importing public GPG Key failed...${NC}"
      echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
      echo
-     exit
+     toolbox_close
    fi 
 fi
 sudo rm -rf  /tmp/*lux* 2>&1 && sleep 2
@@ -1025,7 +1023,7 @@ function start_daemon() {
 	       echo -e "${WORNING} ${CYAN}Last error from ~/$CONFIG_DIR/debug.log: ${NC}"
 	       echo -e "${WORNING} ${CYAN}$error_line${NC}"
 	       echo
-	       exit
+	       toolbox_close
 	     fi  	       
         fi
 	
@@ -1039,7 +1037,7 @@ function start_daemon() {
 	
 	  echo -e "${WORNING} ${RED}Installation stopped by user...${NC}"
 	  echo -n ""
-	  exit
+	  toolbox_close
 
 	fi
 
@@ -1087,7 +1085,7 @@ function install_process() {
       echo -e "${WORNING} ${RED}OS type not supported..${NC}"
       echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
       echo
-      exit    
+      toolbox_close    
 
     fi
     

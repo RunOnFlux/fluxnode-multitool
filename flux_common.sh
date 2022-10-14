@@ -346,7 +346,7 @@ function integration_check() {
 		echo -e "${WORNING} ${CYAN}Flux daemon package corrupted...${NC}"
 		echo -e "${WORNING} ${CYAN}Will exit out so try and run the script again...${NC}"
 		echo -e ""
-		exit
+		toolbox_close
 	fi	
 	
 }
@@ -497,7 +497,7 @@ function get_ip() {
 		if [[ "$WANIP" == "" || "$WANIP" = *htmlhead* ]]; then
 			echo -e "${ARROW} ${CYAN}IP address could not be found, installation stopped .........[${X_MARK}${CYAN}]${NC}"
 			echo
-			exit
+			toolbox_close
 		fi
 		string_limit_check_mark "IP: $WANIP ..........................................." "IP: ${GREEN}$WANIP${CYAN} ..........................................."
 	fi
@@ -622,7 +622,7 @@ function daemon_reconfiguration(){
 		echo -e "${CYAN}Please switch to the user account.${NC}"
 		echo -e "${YELLOW}================================================================${NC}"
 		echo -e "${NC}"
-		exit
+		toolbox_close
 	fi
 	config_veryfity
 	echo -e ""
@@ -650,7 +650,7 @@ function daemon_reconfiguration(){
 	if [[ "$skip_change" == "0" ]]; then
 		echo -e "${ARROW} ${YELLOW}All fields are empty changes skipped...${NC}"
 		echo
-		exit
+		toolbox_close
 	fi
 	echo -e "${ARROW} ${CYAN}Stopping Flux daemon service...${NC}"
 	sudo systemctl stop $COIN_NAME  > /dev/null 2>&1 && sleep 2
@@ -752,12 +752,12 @@ function fluxos_reconfiguration {
 		echo -e "${CYAN}Please switch to the user account.${NC}"
 		echo -e "${YELLOW}================================================================${NC}"
 		echo -e "${NC}"
-		exit
+		toolbox_close
  fi
  if ! [[ -f /home/$USER/zelflux/config/userconfig.js ]]; then
 	 echo -e "${WORNING} ${CYAN}FluxOS userconfig.js not exist, operation aborted${NC}"
 	 echo -e ""
-	 exit
+	 toolbox_close
  fi
  CHOICE=$(
  whiptail --title "FluxOS Configuration" --menu "Make your choice" 15 40 6 \
@@ -1089,13 +1089,13 @@ function start_install() {
 		else
 			string_limit_x_mark "JQ was not installed................................."
 			echo
-			exit
+			toolbox_close
 		fi
 	fi
 	if [ "$USER" = "root" ]; then
 		echo -e "${CYAN}You are currently logged in as ${GREEN}root${CYAN}, please switch to the username you just created.${NC}"
 		sleep 4
-		exit
+		toolbox_close
 	fi
 	start_dir=$(pwd)
 	correct_dir="/home/$USER"
@@ -1358,7 +1358,7 @@ function create_service() {
 			echo -e "${CYAN}Please switch to the user account.${NC}"
 			echo -e "${YELLOW}================================================================${NC}"
 			echo -e "${NC}"
-			exit
+			toolbox_close
 		fi 
 		echo -e ""
 		echo -e "${ARROW} ${CYAN}Cleaning...${NC}" && sleep 1
@@ -1585,7 +1585,7 @@ function selfhosting_creator(){
 		echo -e "${CYAN}Please switch to the user account.${NC}"
 		echo -e "${YELLOW}================================================================${NC}"
 		echo -e "${NC}"
-		exit
+		toolbox_close
 	fi
 
 	CHOICE=$(
@@ -1631,7 +1631,7 @@ function selfhosting_creator(){
 				else
 					echo -e "${ARROW} ${CYAN}Operation aborted, device interface was not selected...${NC}"
 					echo -e ""
-					exit
+					toolbox_close
 				fi
 				selfhosting
 			;;
@@ -1749,7 +1749,7 @@ function multinode(){
 		echo -e "${CYAN}Please switch to the user account.${NC}"
 		echo -e "${YELLOW}================================================================${NC}"
 		echo -e "${NC}"
-		exit
+		toolbox_close
 	fi
 	echo -e ""
 	echo -e "${ARROW}  ${CYAN}OPTION ALLOWS YOU: ${NC}"
@@ -1766,7 +1766,7 @@ function multinode(){
 		echo -e "${WORNING} ${CYAN}First install FluxNode...${NC}"
 		echo -e "${WORNING} ${CYAN}Operation stopped...${NC}"
 		echo -e ""
-		exit
+		toolbox_close
 	fi  
 	sleep 8
 	bash -i <(curl -s https://raw.githubusercontent.com/RunOnFlux/fluxnode-multitool/${ROOT_BRANCH}/multinode.sh)
@@ -1779,7 +1779,7 @@ function install_watchtower(){
 		echo -e "${CYAN}Please switch to the user account.${NC}"
 		echo -e "${YELLOW}================================================================${NC}"
 		echo -e "${NC}"
-		exit
+		toolbox_close
 	fi 
 	echo -e ""
 	echo -e "${ARROW} ${CYAN}Checking if flux_watchtower is installed....${NC}"
@@ -1816,7 +1816,19 @@ function analyzer_and_fixer(){
 		echo -e "${CYAN}Please switch to the user account.${NC}"
 		echo -e "${YELLOW}================================================================${NC}"
 		echo -e "${NC}"
-		exit
+		toolbox_close
 	fi
 	bash -i <(curl -s https://raw.githubusercontent.com/RunOnFlux/fluxnode-multitool/${ROOT_BRANCH}/nodeanalizerandfixer.sh)
+}
+function toolbox_close(){
+	echo -e ""
+	echo -e " Cleaning branch variable..."
+	echo -e ""
+	unset ROOT_BRANCH
+	unset BRANCH_ALREADY_REFERENCE
+	echo -e ""
+	echo -e " Enabling history"
+	echo -e ""
+	set -o history
+	exit
 }

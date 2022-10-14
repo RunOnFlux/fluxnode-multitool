@@ -207,7 +207,7 @@ if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
 	echo -e "${CYAN}Please switch to the user accont.${NC}"
 	echo -e "${YELLOW}================================================================${NC}"
 	echo -e "${NC}"
-	exit
+	toolbox_close
 fi
 sleep 1
 if ! bc -v > /dev/null 2>&1 ; then

@@ -521,7 +521,7 @@ function ssh_port() {
 		else
 			echo -e "${ARROW} ${CYAN}SSH port must be integer................[${X_MARK}${CYAN}]${NC}}"
 			echo
-			exit
+			toolbox_close
 		fi	   
 	fi
 }
@@ -614,7 +614,7 @@ function install_daemon() {
 			echo -e "${WORNING} ${RED}Importing public GPG Key failed...${NC}"
 			echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
 			echo -e ""
-			exit
+			toolbox_close
 		fi
 	fi
 }
@@ -681,7 +681,7 @@ function start_daemon() {
 				echo -e "${WORNING} ${CYAN}Last error from ~/$CONFIG_DIR/debug.log: ${NC}"
 				echo -e "${WORNING} ${CYAN}$error_line${NC}"
 				echo -e ""
-				exit
+				toolbox_close
 			fi  	       
 		fi
 		if whiptail --yesno "Something is not right the daemon did not start or still loading....\nWould you like continue the installation (make sure that flux daemon working) Y/N?" 8 90; then
@@ -690,7 +690,7 @@ function start_daemon() {
 		else
 			echo -e "${WORNING} ${RED}Installation stopped by user...${NC}"
 			echo -n ""
-			exit
+			toolbox_close
 		fi	
 	fi
 }
@@ -716,7 +716,7 @@ function install_process() {
 			echo -e "${WORNING} ${RED}OS type not supported..${NC}"
 			echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
 			echo
-			exit    
+			toolbox_close    
 		fi
 	else
 		curl -fsSL https://www.mongodb.org/static/pgp/server-6.0.asc | gpg --dearmor | sudo tee /usr/share/keyrings/mongodb-archive-keyring.gpg > /dev/null 2>&1
@@ -728,7 +728,7 @@ function install_process() {
 			echo -e "${WORNING} ${RED}OS type not supported..${NC}"
 			echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
 			echo
-			exit    
+			toolbox_close    
 		fi
 	fi
 	
