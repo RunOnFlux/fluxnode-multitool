@@ -1555,7 +1555,8 @@ function upnp_enable() {
 	if [[ "$error_check" == "" ]]; then
 		echo -e ""
 		LOCAL_IP=$(ip -o route get to 8.8.8.8 | sed -n 's/.*src \([0-9.]\+\).*/\1/p')
-		echo -e "${PIN} ${CYAN}To access your FluxOS use this url: ${SEA}http://${LOCAL_IP}:$(($FLUX_PORT-1))${NC}"
+		ZELFRONTPORT=$(($FLUX_PORT-1))
+		echo -e "${PIN} ${CYAN}To access your FluxOS use this url: ${SEA}http://${LOCAL_IP}:$ZELFRONTPORT${NC}"
 		echo -e ""
 	else
 		echo -e "${WORNING} ${RED}Problem with UPnP detected, FluxOS Shutting down...${NC}"
