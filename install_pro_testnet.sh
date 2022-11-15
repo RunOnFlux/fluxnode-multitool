@@ -1084,7 +1084,7 @@ function install_process() {
 
     else
 
-      echo -e "${WORNING} ${RED}OS type not supported..${NC}"
+      echo -e "${WORNING} ${RED}OS type $(lsb_release -si) - $(lsb_release -cs) not supported..${NC}"
       echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
       echo
       exit    

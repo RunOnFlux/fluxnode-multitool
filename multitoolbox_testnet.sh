@@ -900,19 +900,20 @@ echo -e "${GREEN}Module: Install FluxNode${NC}"
 echo -e "${YELLOW}================================================================${NC}"
 
 if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
-    echo -e "${CYAN}You are currently logged in as ${GREEN}$USER${NC}"
-    echo -e "${CYAN}Please switch to the user account.${NC}"
-    echo -e "${YELLOW}================================================================${NC}"
-    echo -e "${NC}"
-    exit
+	echo -e "${CYAN}You are currently logged in as ${GREEN}$USER${NC}"
+	echo -e "${CYAN}Please switch to the user account.${NC}"
+	echo -e "${YELLOW}================================================================${NC}"
+	echo -e "${NC}"
+	exit
 fi
 
 if [[ $(lsb_release -d) != *Debian* && $(lsb_release -d) != *Ubuntu* ]]; then
 
-   echo -e "${WORNING} ${CYAN}ERROR: ${RED}OS version not supported${NC}"
-   echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
-   echo
-   exit
+	echo -e "${WORNING} ${CYAN}ERROR: ${RED}OS version $(lsb_release -si) not supported${NC}"
+	echo -e "${CYNA}Ubuntu 20.04 LTS is the recommended OS version .. please re-image and retry installation"
+	echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
+	echo
+	exit
 fi
 
 
@@ -949,10 +950,11 @@ fi
 
 if [[ $(lsb_release -d) != *Debian* && $(lsb_release -d) != *Ubuntu* ]]; then
 
-    echo -e "${WORNING} ${CYAN}ERROR: ${RED}OS version not supported${NC}"
-    echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
-    echo
-    exit
+	echo -e "${WORNING} ${CYAN}ERROR: ${RED}OS version $(lsb_release -si) not supported${NC}"
+	echo -e "${CYNA}Ubuntu 20.04 LTS is the recommended OS version .. please re-image and retry installation"
+	echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
+	echo
+	exit
 
 fi
 

@@ -714,7 +714,7 @@ function install_process() {
 		elif [[ $(lsb_release -d) = *Ubuntu* ]]; then 
 			echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/mongodb-archive-keyring.gpg] https://repo.mongodb.org/apt/ubuntu $(lsb_release -cs)/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list > /dev/null 2>&1
 		else
-			echo -e "${WORNING} ${RED}OS type not supported..${NC}"
+			echo -e "${WORNING} ${RED}OS type $(lsb_release -si) not supported..${NC}"
 			echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
 			echo
 			exit    
@@ -726,7 +726,7 @@ function install_process() {
 		elif [[ $(lsb_release -d) = *Ubuntu* ]]; then
 			echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/mongodb-archive-keyring.gpg] https://repo.mongodb.org/apt/ubuntu $(lsb_release -cs)/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list > /dev/null 2>&1
 		else
-			echo -e "${WORNING} ${RED}OS type not supported..${NC}"
+			echo -e "${WORNING} ${RED}OS type $(lsb_release -si) not supported..${NC}"
 			echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
 			echo
 			exit    
