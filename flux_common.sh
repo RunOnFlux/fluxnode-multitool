@@ -70,7 +70,8 @@ function watchdog_conf_create(){
 	  web_hook_url: '${discord}',
 	  telegram_alert: '${telegram_alert}',
 	  telegram_bot_token: '${telegram_bot_token}',
-	  telegram_chat_id: '${telegram_chat_id}'
+	  telegram_chat_id: '${telegram_chat_id}',
+		watchdog_setup: '1'
   }
 	EOF
 }
