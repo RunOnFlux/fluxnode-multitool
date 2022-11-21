@@ -71,7 +71,7 @@ function watchdog_conf_create(){
 	  telegram_alert: '${telegram_alert}',
 	  telegram_bot_token: '${telegram_bot_token}',
 	  telegram_chat_id: '${telegram_chat_id}',
-		watchdog_setup: '1'
+	  watchdog_setup: '1'
   }
 	EOF
 }
