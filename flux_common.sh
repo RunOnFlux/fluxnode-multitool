@@ -6,9 +6,9 @@ trap toolbox_close EXIT
 function toolbox_close(){
 	unset ROOT_BRANCH
 	unset BRANCH_ALREADY_REFERENCE
-	 if [[ $(set -o | grep history) == *"off"* ]]; then
-    set -o history
-  fi
+	if [[ $(set -o | grep history) == *"off"* ]]; then
+		set -o history
+	fi
 }
 trap ctrl_c INT
 # exit on ctl_c and call toolbox close from EXIT trap
