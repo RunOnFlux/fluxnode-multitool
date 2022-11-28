@@ -154,7 +154,7 @@ function install_flux() {
 			echo -e "${PIN}${CYAN}Kadena address = ${GREEN}$KDA_A${NC}"
 		fi
 		upnp_port=$(grep -w apiport /home/$USER/$FLUX_DIR/config/userconfig.js | sed -e 's/.*apiport: .//' | sed -e 's/.\{2\}$//')
-		if [[ -n "$upnp_port" && "$upnp" != 'a' ]]; then
+		if [[ -n "$upnp_port" && "$upnp_port" != 'a' ]]; then
 			echo -e "${PIN}${CYAN}UPNP port = ${GREEN}$upnp_port${NC}"
 		fi
 		echo -e "${PIN}${CYAN}IP = ${GREEN}$WANIP${NC}"  
@@ -218,7 +218,7 @@ function install_flux() {
 	fi
 	fluxos_conf_create
 	# append flux api port to userconfig file
-	if [[ -n "$upnp_port" && "$upnp" != 'a' ]]; then
+	if [[ -n "$upnp_port" && "$upnp_port" != 'a' ]]; then
 		sed -i "s/$(grep -e apiport /home/$USER/zelflux/config/userconfig.js)/    apiport: '$upnp_port',/" /home/$USER/zelflux/config/userconfig.js
 	fi
 	if [[ -f /home/$USER/$FLUX_DIR/config/userconfig.js ]]; then
