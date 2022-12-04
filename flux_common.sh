@@ -1695,6 +1695,7 @@ function selfhosting() {
 	sudo chown $USER:$USER /home/$USER/ip_check.sh
 	cat <<-'EOF' > /home/$USER/ip_check.sh
 	#!/bin/bash
+	USER=$(whoami)
 
 	function get_ip(){
 	WANIP=$(curl --silent -m 10 https://api4.my-ip.io/ip | tr -dc '[:alnum:].')
@@ -1724,6 +1725,11 @@ function selfhosting() {
 	  if [[ "$device_name" != "" && "$WANIP" != "" ]]; then
 		date_timestamp=$(date '+%Y-%m-%d %H:%M:%S')
 		echo -e "New IP detected, IP: $WANIP was added at $date_timestamp" >> /home/$USER/ip_history.log
+		for i in $(ip --oneline addr show ${device_name} | grep "/32" | awk '{print $4}'); 
+		do
+			[[ $i == "${WANIP}/32"  ]] && exit 0
+			sudo ip addr del $i dev $device_name
+		done
 		sudo ip addr add $WANIP dev $device_name && sleep 2
 	  fi
 	fi
@@ -1734,11 +1740,19 @@ function selfhosting() {
 	  if [[ "$api_port" == "" ]]; then
 		api_port="16127"
 	  fi
-	  confirmed_ip=$(curl -SsL -m 10 http://localhost:$api_port/flux/info | jq -r .data.node.status.ip | sed -r 's/:.+//')
+	  confirmed_ip=$(curl -SsL --retry 5 -m 10 http://localhost:$api_port/flux/info | jq -r .data.node.status.ip | sed -r 's/:.+//')
 	  if [[ "$WANIP" != "" && "$confirmed_ip" != "" ]]; then
 		 if [[ "$WANIP" != "$confirmed_ip" ]]; then
+		 	current_reg_ip=$(ip --oneline addr show ${device_name} | grep "/32" | awk '{print $4}')
+      			[[ "${WANIP}/32" == "${current_reg_ip}" ]] && exit 0
+			
 			date_timestamp=$(date '+%Y-%m-%d %H:%M:%S')
 			echo -e "New IP detected, IP: $WANIP was added at $date_timestamp" >> /home/$USER/ip_history.log
+			for i in $(ip --oneline addr show ${device_name} | grep "/32" | awk '{print $4}'); 
+			do
+         			[[ $i == "${WANIP}/32"  ]] && exit 0
+         			sudo ip addr del $i dev $device_name
+      			done
 			sudo ip addr add $WANIP dev $device_name && sleep 2
 		 fi
 	  fi
