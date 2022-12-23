@@ -387,7 +387,7 @@ function config_builder() {
 }
 
 function smart_reconfiguration(){
- watchdog_settings_list=("label", "tier_eps_min", "zelflux_update", "zelcash_update", "zelbench_update", "action", "ping", "watcdog_setup", "web_hook_url", "telegram_alert", "telegram_bot_token", "telegram_chat_id")
+ watchdog_settings_list=("label", "tier_eps_min", "zelflux_update", "zelcash_update", "zelbench_update", "action", "ping", "watchdog_setup", "web_hook_url", "telegram_alert", "telegram_bot_token", "telegram_chat_id")
  fluxos_settings_list=("kadena", "zelid", "apiport", "ipaddress")
  daemon_settings_list=("zelnodeprivkey", "zelnodeoutpoint", "zelnodeindex")
  benchmark_settings_list=("fluxport", "thunder", "speedtestserverid")
