@@ -385,10 +385,10 @@ function create_config() {
 						do
 							watchdog_setup=$(whiptail --title "Would you like to enable a setup ping?" --radiolist \
 							"Use the UP/DOWN arrows to highlight your selection. Press Spacebar on the option you want to select, THEN press ENTER." 8 50 2 \
-							"YES" "" ON \
-							"NO" "" OFF 3>&1 1>&2 2>&3)
+							"YES-1" "" ON \
+							"NO-0" "" OFF 3>&1 1>&2 2>&3 | awk -F "-" '{print $2}')
 							
-							if [[ $watchdog_setup == ?(-)+([0-9]) ]]; then
+							if [[ $watchdog_setup =~ ^-?[0-9]+$ ]]; then
 								string_limit_check_mark "Setup ping is valid..........................................."
 								break
 							else
@@ -621,10 +621,10 @@ function install_watchdog() {
 							do
 								watchdog_setup=$(whiptail --title "Would you like to enable a setup ping?" --radiolist \
 								"Use the UP/DOWN arrows to highlight your selection. Press Spacebar on the option you want to select, THEN press ENTER." 8 50 2 \
-								"YES" "" ON \
-								"NO" "" OFF 3>&1 1>&2 2>&3)
+								"YES-1" "" ON \
+								"NO-0" "" OFF 3>&1 1>&2 2>&3 | awk -F "-" '{print $2}')
 								
-								if [[ $watchdog_setup == ?(-)+([0-9]) ]]; then
+								if [[ $watchdog_setup =~ ^-?[0-9]+$ ]]; then
 									string_limit_check_mark "Setup ping is valid..........................................."
 									break
 								else
