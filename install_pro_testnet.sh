@@ -207,7 +207,7 @@ if [ -z "$CHOICES" ]; then
   sleep 1
   discord=0;
   ping=0;
-	watchdog_setup=0;
+  watchdog_setup=0;
   telegram_alert=0;
   telegram_bot_token=0;
   telegram_chat_id=0;
