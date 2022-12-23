@@ -84,26 +84,24 @@ function import_date() {
 				if [[ -f /home/$USER/watchdog/config.js ]]; then
 					echo -e ""
 					echo -e "${ARROW} ${YELLOW}Imported watchdog settings:${NC}"
+					init_watchdog_settings
 		
-					node_label=$(grep -w label /home/$USER/watchdog/config.js | sed -e 's/.*label: .//' | sed -e 's/.\{2\}$//')
 					if [[ "$node_label" != "" && "$node_label" != "0" ]]; then
 						echo -e "${PIN}${CYAN} Label = ${GREEN}Enabled${NC}"
 					else
 						echo -e "${PIN}${CYAN} Label = ${RED}Disabled${NC}"
 					fi
 		
-					eps_limit=$(grep -w tier_eps_min /home/$USER/watchdog/config.js | sed -e 's/.*tier_eps_min: .//' | sed -e 's/.\{2\}$//')
 					if [[ "$eps_limit" != "" && "$eps_limit" != "0" ]]; then
 						echo -e "${PIN}${CYAN} Tier_eps_min = ${GREEN}$eps_limit${NC}"   
 					fi
 		
-					discord=$(grep -w web_hook_url /home/$USER/watchdog/config.js | sed -e 's/.*web_hook_url: .//' | sed -e 's/.\{2\}$//')	      
 					if [[ "$discord" != "" && "$discord" != "0" ]]; then
 						echo -e "${PIN}${CYAN} Discord alert = ${GREEN}Enabled${NC}"
 					else
 						echo -e "${PIN}${CYAN} Discord alert = ${RED}Disabled${NC}"
 					fi
-					ping=$(grep -w ping /home/$USER/watchdog/config.js | sed -e 's/.*ping: .//' | sed -e 's/.\{2\}$//')    
+
 					if [[ "$ping" != "" && "$ping" != "0" ]]; then	      
 						if [[ "$discord" != "" && "$discord" != "0" ]]; then
 							echo -e "${PIN}${CYAN} Discord ping = ${GREEN}Enabled${NC}"
@@ -111,19 +109,25 @@ function import_date() {
 							echo -e "${PIN}${CYAN} Discord ping = ${RED}Disabled${NC}"
 						fi      
 					fi
-					telegram_alert=$(grep -w telegram_alert /home/$USER/watchdog/config.js | sed -e 's/.*telegram_alert: .//' | sed -e 's/.\{2\}$//')
+
+					if [[ "$watchdog_setup" != "" && "$watchdog_setup" != "0" ]]; then	      
+						if [[ "$discord" != "" && "$discord" != "0" ]]; then
+							echo -e "${PIN}${CYAN} Discord setup ping = ${GREEN}Enabled${NC}"
+						else
+							echo -e "${PIN}${CYAN} Discord setup ping = ${RED}Disabled${NC}"
+						fi      
+					fi
+
 					if [[ "$telegram_alert" != "" && "$telegram_alert" != "0" ]]; then
 						echo -e "${PIN}${CYAN} Telegram alert = ${GREEN}Enabled${NC}"
 					else
 						echo -e "${PIN}${CYAN} Telegram alert = ${RED}Disabled${NC}"
 					fi
 		
-					telegram_bot_token=$(grep -w telegram_bot_token /home/$USER/watchdog/config.js | sed -e 's/.*telegram_bot_token: .//' | sed -e 's/.\{2\}$//')
 					if [[ "$telegram_alert" == "1" ]]; then
 						echo -e "${PIN}${CYAN} Telegram bot token = ${GREEN}$telegram_alert${NC}"	
 					fi
 		
-					telegram_chat_id=$(grep -w telegram_chat_id /home/$USER/watchdog/config.js | sed -e 's/.*telegram_chat_id: .//' | sed -e 's/.\{1\}$//')
 					if [[ "$telegram_alert" == "1" ]]; then
 						echo -e "${PIN}${CYAN} Telegram chat id = ${GREEN}$telegram_chat_id${NC}"	
 					fi
@@ -170,23 +174,24 @@ function import_date() {
 				if [[ -f /home/$USER/watchdog/config.js ]]; then
 					echo -e ""
 					echo -e "${ARROW} ${YELLOW}Imported watchdog settings:${NC}"  
-					node_label=$(grep -w label /home/$USER/watchdog/config.js | sed -e 's/.*label: .//' | sed -e 's/.\{2\}$//')
+					init_watchdog_settings
+
 					if [[ "$node_label" != "" && "$node_label" != "0" ]]; then
 						echo -e "${PIN}${CYAN} Label = ${GREEN}Enabled${NC}"
 					else
 						echo -e "${PIN}${CYAN} Label = ${RED}Disabled${NC}"
 					fi
-					eps_limit=$(grep -w tier_eps_min /home/$USER/watchdog/config.js | sed -e 's/.*tier_eps_min: .//' | sed -e 's/.\{2\}$//')
+
 					if [[ "$eps_limit" != "" && "$eps_limit" != "0" ]]; then
 						echo -e "${PIN}${CYAN} Tier_eps_min = ${GREEN}$eps_limit${NC}" 
 					fi
-					discord=$(grep -w web_hook_url /home/$USER/watchdog/config.js | sed -e 's/.*web_hook_url: .//' | sed -e 's/.\{2\}$//')	      
+
 					if [[ "$discord" != "" && "$discord" != "0" ]]; then
 						echo -e "${PIN}${CYAN} Discord alert = ${GREEN}Enabled${NC}"
 						else
 						echo -e "${PIN}${CYAN} Discord alert = ${RED}Disabled${NC}"
 					fi
-					ping=$(grep -w ping /home/$USER/watchdog/config.js | sed -e 's/.*ping: .//' | sed -e 's/.\{2\}$//')    
+
 					if [[ "$ping" != "" && "$ping" != "0" ]]; then
 						if [[ "$discord" != "" && "$discord" != "0" ]]; then
 							echo -e "${PIN}${CYAN} Discord ping = ${GREEN}Enabled${NC}"
@@ -194,17 +199,25 @@ function import_date() {
 							echo -e "${PIN}${CYAN} Discord ping = ${RED}Disabled${NC}"
 						fi
 					fi
-					telegram_alert=$(grep -w telegram_alert /home/$USER/watchdog/config.js | sed -e 's/.*telegram_alert: .//' | sed -e 's/.\{2\}$//')
+
+					if [[ "$watchdog_setup" != "" && "$watchdog_setup" != "0" ]]; then
+						if [[ "$discord" != "" && "$discord" != "0" ]]; then
+							echo -e "${PIN}${CYAN} Discord setup ping = ${GREEN}Enabled${NC}"
+						else
+							echo -e "${PIN}${CYAN} Discord setup ping = ${RED}Disabled${NC}"
+						fi
+					fi
+
 					if [[ "$telegram_alert" != "" && "$telegram_alert" != "0" ]]; then
 						echo -e "${PIN}${CYAN} Telegram alert = ${GREEN}Enabled${NC}"
 					else
 						echo -e "${PIN}${CYAN} Telegram alert = ${RED}Disabled${NC}"
 					fi
-					telegram_bot_token=$(grep -w telegram_bot_token /home/$USER/watchdog/config.js | sed -e 's/.*telegram_bot_token: .//' | sed -e 's/.\{2\}$//')
+
 					if [[ "$telegram_alert" == "1" ]]; then
 						echo -e "${PIN}${CYAN} Telegram bot token = ${GREEN}$telegram_alert${NC}"	
 					fi
-					telegram_chat_id=$(grep -w telegram_chat_id /home/$USER/watchdog/config.js | sed -e 's/.*telegram_chat_id: .//' | sed -e 's/.\{1\}$//')
+
 					if [[ "$telegram_alert" == "1" ]]; then
 						echo -e "${PIN}${CYAN} Telegram chat id = ${GREEN}$telegram_chat_id${NC}" 	
 					fi	  
@@ -271,6 +284,7 @@ function install_watchdog() {
 				sleep 1
 				discord="0"
 				ping="0"
+				watchdog_setup="0"
 				telegram_alert="0"
 				telegram_bot_token="0"
 				telegram_chat_id="0"
@@ -295,9 +309,27 @@ function install_watchdog() {
 									sleep 1
 								fi
 							done
+
+							while true
+							do
+								watchdog_setup=$(whiptail --title "Would you like to enable a setup ping?" --radiolist \
+								"Use the UP/DOWN arrows to highlight your selection. Press Spacebar on the option you want to select, THEN press ENTER." 8 50 2 \
+								"YES-1" "" ON \
+								"NO-0" "" OFF 3>&1 1>&2 2>&3 | awk -F "-" '{print $2}')
+								
+								if [[ $watchdog_setup =~ ^-?[0-9]+$ ]]; then
+									string_limit_check_mark "Setup ping is valid..........................................."
+									break
+								else
+									string_limit_x_mark "Setup ping is not valid try again............................."
+									sleep 1
+								fi
+							done
+
 							sleep 1
 						else
 							 ping=0;
+							 watchdog_setup=0;
 							sleep 1
 						fi
 					;;
@@ -345,6 +377,7 @@ function install_watchdog() {
 		else
 			discord="0"
 			ping="0"
+			watchdog_setup="0"
 			telegram_alert="0"
 			telegram_bot_token="0"
 			telegram_chat_id="0"
@@ -353,6 +386,7 @@ function install_watchdog() {
 		fi
 		if [[ "$discord" == 0 ]]; then
 			ping="0";
+			watchdog_setup="0";
 		fi
 		if [[ "$telegram_alert" == 0 ]]; then
 			telegram_bot_token="0";
