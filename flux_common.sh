@@ -2252,17 +2252,17 @@ function init_watchdog_settings(){
 }
 
 function watchdog_var_prompt(){
-	fix_action='1'
+	fix_action="1"
 	if whiptail --yesno "Would you like enable autoupdates?" 8 60; then
-		flux_update='1'
-		daemon_update='1'
-		bench_update='1'
+		flux_update="1"
+		daemon_update="1"
+		bench_update="1"
 	else
-		flux_update='0'
-		daemon_update='0'
-		bench_update='0'
+		flux_update="0"
+		daemon_update="0"
+		bench_update="0"
 	fi
-	discord='0'
+	discord="0"
 	if whiptail --yesno "Would you like enable alert notification?" 8 60; then
 		sleep 1
 		whiptail --msgbox "Info: to select/deselect item use 'space' ...to switch to OK/Cancel use 'tab' " 10 60
@@ -2300,29 +2300,16 @@ function watchdog_var_prompt(){
 								sleep 1
 							fi
 						done
-
-						while true
-						do
-							watchdog_setup=$(whiptail --title "Would you like to enable a setup ping?" --radiolist \
-							"Use the UP/DOWN arrows to highlight your selection. Press Spacebar on the option you want to select, THEN press ENTER." 11 60 2 \
-							"YES-1" "" ON \
-							"NO-0" "" OFF 3>&1 1>&2 2>&3 | awk -F "-" '{print $2}')
-							
-							if [[ $watchdog_setup =~ ^-?[0-9]+$ ]]; then
-								string_limit_check_mark "Setup ping is valid..........................................."
-								break
-							else
-								string_limit_x_mark "Setup ping is not valid try again............................."
-								sleep 1
-							fi
-						done
-
-						sleep 1
 					else
-							ping=0;
-							watchdog_setup=0;
-						sleep 1
+						ping="0"
 					fi
+					sleep 1
+					if whiptail --yesno "Would you like to enable a setup ping?" 8 60; then
+						watchdog_setup="1"
+					else
+						watchdog_setup="0"
+					fi						
+						sleep 1
 				;;
 				"2")
 					telegram_alert="1"
@@ -2376,12 +2363,12 @@ function watchdog_var_prompt(){
 		sleep 1
 	fi
 	if [[ "$discord" == 0 ]]; then
-		ping="0";
-		watchdog_setup="0";
+		ping="0"
+		watchdog_setup="0"
 	fi
 	if [[ "$telegram_alert" == 0 || "$telegram_alert" == "" ]]; then
 		telegram_alert="0"
-		telegram_bot_token="0";
-		telegram_chat_id="0";
+		telegram_bot_token="0"
+		telegram_chat_id="0"
 	fi
 }
