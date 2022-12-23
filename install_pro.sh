@@ -262,146 +262,18 @@ function install_watchdog() {
 			fi
 			return 
 		fi
-		if whiptail --yesno "Would you like enable autoupdate?" 8 60; then
-			flux_update='1'
-			daemon_update='1'
-			bench_update='1'
-		else
-			flux_update='0'
-			daemon_update='0'
-			bench_update='0'
-		fi
-		discord='0'
-		if whiptail --yesno "Would you like enable alert notification?" 8 60; then
-			sleep 1
-			whiptail --msgbox "Info: to select/deselect item use 'space' ...to switch to OK/Cancel use 'tab' " 10 60
-			sleep 1
-			CHOICES=$(whiptail --title "Choose options: " --separate-output --checklist "Choose options: " 10 45 5 \
-			"1" "Discord notification      " ON \
-			"2" "Telegram notification     " OFF 3>&1 1>&2 2>&3 )
-			if [ -z "$CHOICES" ]; then
-				echo -e "${ARROW} ${CYAN}No option was selected...Alert notification disabled! ${NC}"
-				sleep 1
-				discord="0"
-				ping="0"
-				watchdog_setup="0"
-				telegram_alert="0"
-				telegram_bot_token="0"
-				telegram_chat_id="0"
-				node_label="0"
-			else
-				for CHOICE in $CHOICES; 
-				do
-					case "$CHOICE" in
-					"1")
-						discord=$(whiptail --inputbox "Enter your discord server webhook url" 8 65 3>&1 1>&2 2>&3)
-						sleep 1
-						if whiptail --yesno "Would you like enable nick ping on discord?" 8 60; then
+		#prompt for watchdog options
+		watchdog_var_prompt		
 
-							while true
-							do
-								ping=$(whiptail --inputbox "Enter your discord user id" 8 60 3>&1 1>&2 2>&3)
-								if [[ $ping == ?(-)+([0-9]) ]]; then
-									string_limit_check_mark "UserID is valid..........................................."
-									break
-								else
-									string_limit_x_mark "UserID is not valid try again............................."
-									sleep 1
-								fi
-							done
-
-							while true
-							do
-								watchdog_setup=$(whiptail --title "Would you like to enable a setup ping?" --radiolist \
-								"Use the UP/DOWN arrows to highlight your selection. Press Spacebar on the option you want to select, THEN press ENTER." 8 50 2 \
-								"YES-1" "" ON \
-								"NO-0" "" OFF 3>&1 1>&2 2>&3 | awk -F "-" '{print $2}')
-								
-								if [[ $watchdog_setup =~ ^-?[0-9]+$ ]]; then
-									string_limit_check_mark "Setup ping is valid..........................................."
-									break
-								else
-									string_limit_x_mark "Setup ping is not valid try again............................."
-									sleep 1
-								fi
-							done
-
-							sleep 1
-						else
-							 ping=0;
-							 watchdog_setup=0;
-							sleep 1
-						fi
-					;;
-					"2")
-						telegram_alert="1"
-						while true
-						do
-							telegram_bot_token=$(whiptail --inputbox "Enter telegram bot token from BotFather" 8 65 3>&1 1>&2 2>&3)
-							if [[ $(grep ':' <<< "$telegram_bot_token") != "" ]]; then
-								string_limit_check_mark "Bot token is valid..........................................."
-								break
-							else
-								string_limit_x_mark "Bot token is not valid try again............................."
-								sleep 1
-							fi
-						done
-						sleep 1
-						while true
-						do
-							telegram_chat_id=$(whiptail --inputbox "Enter your chat id from GetIDs Bot" 8 60 3>&1 1>&2 2>&3)
-							if [[ $telegram_chat_id == ?(-)+([0-9]) ]]; then
-								string_limit_check_mark "Chat ID is valid..........................................."
-								break
-							else
-								string_limit_x_mark "Chat ID is not valid try again............................."
-								sleep 1
-							fi
-						done
-						sleep 1
-					;;
-				esac
-				done
-			fi
-			while true
-			do
-				node_label=$(whiptail --inputbox "Enter name of your node (alias)" 8 65 3>&1 1>&2 2>&3)
-				if [[ "$node_label" != "" && "$node_label" != "0"  ]]; then
-					string_limit_check_mark "Node name is valid..........................................."
-					break
-					else
-					string_limit_x_mark "Node name is not valid try again............................."
-					sleep 1
-				fi
-			done
-		else
-			discord="0"
-			ping="0"
-			watchdog_setup="0"
-			telegram_alert="0"
-			telegram_bot_token="0"
-			telegram_chat_id="0"
-			node_label="0"
-			sleep 1
-		fi
-		if [[ "$discord" == 0 ]]; then
-			ping="0";
-			watchdog_setup="0";
-		fi
-		if [[ "$telegram_alert" == 0 ]]; then
-			telegram_bot_token="0";
-			telegram_chat_id="0";
-		fi
 		if [[ -f /home/$USER/$CONFIG_DIR/$CONFIG_FILE ]]; then
 			index_from_file=$(grep -w zelnodeindex /home/$USER/$CONFIG_DIR/$CONFIG_FILE | sed -e 's/zelnodeindex=//')
 			tx_from_file=$(grep -w zelnodeoutpoint /home/$USER/$CONFIG_DIR/$CONFIG_FILE | sed -e 's/zelnodeoutpoint=//')
 			stak_info=$(curl -s -m 5 https://$network_url_1/api/tx/$tx_from_file | jq -r ".vout[$index_from_file] | .value,.n,.scriptPubKey.addresses[0],.spentTxId" | paste - - - - | awk '{printf "%0.f %d %s %s\n",$1,$2,$3,$4}' | grep 'null' | egrep -o '1000|12500|40000')
 			if [[ "$stak_info" == "" ]]; then
-			stak_info=$(curl -s -m 5 https://$network_url_2/api/tx/$tx_from_file | jq -r ".vout[$index_from_file] | .value,.n,.scriptPubKey.addresses[0],.spentTxId" | paste - - - - | awk '{printf "%0.f %d %s %s\n",$1,$2,$3,$4}' | grep 'null' | egrep -o '1000|12500|40000')
+				stak_info=$(curl -s -m 5 https://$network_url_2/api/tx/$tx_from_file | jq -r ".vout[$index_from_file] | .value,.n,.scriptPubKey.addresses[0],.spentTxId" | paste - - - - | awk '{printf "%0.f %d %s %s\n",$1,$2,$3,$4}' | grep 'null' | egrep -o '1000|12500|40000')
 			fi	   
 		fi
 		if [[ $stak_info == ?(-)+([0-9]) ]]; then
-
 			case $stak_info in
 				"1000") eps_limit=90 ;;
 				"12500")  eps_limit=180 ;;
@@ -410,6 +282,7 @@ function install_watchdog() {
 		else
 			eps_limit=0;
 		fi
+
 		watchdog_conf_create
 		pm2 start /home/$USER/watchdog/watchdog.js --name watchdog --watch /home/$USER/watchdog --ignore-watch '"./**/*.git" "./**/*node_modules" "./**/*watchdog_error.log" "./**/*config.js"' --watch-delay 20 > /dev/null 2>&1 
 		pm2 save > /dev/null 2>&1
