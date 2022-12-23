@@ -2241,7 +2241,7 @@ function init_watchdog_settings(){
 	eps_limit=$(grep -w tier_eps_min /home/$USER/watchdog/config.js | sed -e 's/.*tier_eps_min: .//' | sed -e 's/.\{2\}$//')
 	discord=$(grep -w web_hook_url /home/$USER/watchdog/config.js | sed -e 's/.*web_hook_url: .//' | sed -e 's/.\{2\}$//')
 	ping=$(grep -w ping /home/$USER/watchdog/config.js | sed -e 's/.*ping: .//' | sed -e 's/.\{2\}$//')
-	watchdog_setup=$(grep -w watchdog_setup /home/$USER/watchdog/config.js | sed -e 's/.*watchdog_setup: .//' | sed -e 's/.\{2\}$//')
+	watchdog_setup=$(grep -w watchdog_setup /home/$USER/watchdog/config.js | sed -e 's/.*watchdog_setup: .//' | egrep -o '[0-9]')
 	telegram_alert=$(grep -w telegram_alert /home/$USER/watchdog/config.js | sed -e 's/.*telegram_alert: .//' | sed -e 's/.\{2\}$//')
 	telegram_bot_token=$(grep -w telegram_bot_token /home/$USER/watchdog/config.js | sed -e 's/.*telegram_bot_token: .//' | sed -e 's/.\{2\}$//')
 	telegram_chat_id=$(grep -w telegram_chat_id /home/$USER/watchdog/config.js | sed -e 's/.*telegram_chat_id: .//' | sed -e 's/.\{1\}$//')
