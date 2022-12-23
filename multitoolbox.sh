@@ -300,6 +300,7 @@ function create_config() {
 		eps_limit="0"
 		discord="0"
 		ping="0"
+		watchdog_setup="0"
 		telegram_alert="0"    
 		telegram_bot_token="0"	      	      
 		telegram_chat_id="0"	
@@ -357,6 +358,7 @@ function create_config() {
 				sleep 1
 				discord="0"
 				ping="0"
+				watchdog_setup="0"
 				telegram_alert="0"
 				telegram_bot_token="0"
 				telegram_chat_id="0"
@@ -379,9 +381,25 @@ function create_config() {
 							sleep 1
 						fi
 						done
+						while true
+						do
+							watchdog_setup=$(whiptail --title "Would you like to enable a setup ping?" --radiolist \
+							"Use the UP/DOWN arrows to highlight your selection. Press Spacebar on the option you want to select, THEN press ENTER." 8 50 2 \
+							"YES" "" ON \
+							"NO" "" OFF 3>&1 1>&2 2>&3)
+							
+							if [[ $watchdog_setup == ?(-)+([0-9]) ]]; then
+								string_limit_check_mark "Setup ping is valid..........................................."
+								break
+							else
+								string_limit_x_mark "Setup ping is not valid try again............................."
+								sleep 1
+							fi
+						done
 						sleep 1
 					else
 						ping="0"
+						watchdog_setup="0"
 						sleep 1
 					fi
 				;;
@@ -429,6 +447,7 @@ function create_config() {
 		else
 			discord="0"
 			ping="0"
+			watchdog_setup="0"
 			telegram_alert="0"
 			telegram_bot_token="0"
 			telegram_chat_id="0"
@@ -438,6 +457,7 @@ function create_config() {
 
 		if [[ "$discord" == 0 ]]; then
 			ping="0"
+			watchdog_setup="0"
 		fi
 
 		if [[ "$telegram_alert" == 0 || "$telegram_alert" == "" ]]; then
@@ -574,6 +594,7 @@ function install_watchdog() {
 			sleep 1
 			discord=0;
 			ping=0;
+			watchdog_setup=0;
 			telegram_alert=0;
 			telegram_bot_token=0;
 			telegram_chat_id=0;
@@ -596,9 +617,25 @@ function install_watchdog() {
 									sleep 1
 								fi
 							done
+							while true
+							do
+								watchdog_setup=$(whiptail --title "Would you like to enable a setup ping?" --radiolist \
+								"Use the UP/DOWN arrows to highlight your selection. Press Spacebar on the option you want to select, THEN press ENTER." 8 50 2 \
+								"YES" "" ON \
+								"NO" "" OFF 3>&1 1>&2 2>&3)
+								
+								if [[ $watchdog_setup == ?(-)+([0-9]) ]]; then
+									string_limit_check_mark "Setup ping is valid..........................................."
+									break
+								else
+									string_limit_x_mark "Setup ping is not valid try again............................."
+									sleep 1
+								fi
+							done
 							sleep 1
 						else
 							ping=0;
+							watchdog_setup=0;
 							sleep 1
 						fi
 					;;
@@ -651,6 +688,7 @@ function install_watchdog() {
 		node_label=0;
 		discord=0;
 		ping=0;
+		watchdog_setup=0;
 		telegram_alert=0;
 		telegram_bot_token=0;
 		telegram_chat_id=0;
@@ -658,6 +696,7 @@ function install_watchdog() {
 	fi
 	if [[ $discord == 0 ]]; then
 		ping=0;
+		watchdog_setup=0;
 	fi
 	if [[ $telegram_alert == 0 ]]; then
 		telegram_bot_token=0;
