@@ -326,18 +326,9 @@ fi
 }
 
 function create_config() {
-if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
-    echo -e "${CYAN}You are currently logged in as ${GREEN}$USER${NC}"
-    echo -e "${CYAN}Please switch to the user account.${NC}"
-    echo -e "${YELLOW}================================================================${NC}"
-    echo -e "${NC}"
-    exit
-fi
-
+check_user
 echo -e "${GREEN}Module: Create FluxNode installation config file${NC}"
 echo -e "${YELLOW}================================================================${NC}"
-
-
 if jq --version > /dev/null 2>&1; then
 sleep 0.2
 else
@@ -510,14 +501,7 @@ echo
 
 function install_watchdog() {
 
-if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
-    echo -e "${CYAN}You are currently logged in as ${GREEN}$USER${NC}"
-    echo -e "${CYAN}Please switch to the user account.${NC}"
-    echo -e "${YELLOW}================================================================${NC}"
-    echo -e "${NC}"
-    exit
-fi
-
+check_user
 echo -e "${GREEN}Module: Install watchdog for FluxNode${NC}"
 echo -e "${YELLOW}================================================================${NC}"
 
@@ -771,15 +755,7 @@ function flux_daemon_bootstrap() {
 
     echo -e "${GREEN}Module: Restore Flux blockchain from bootstrap${NC}"
     echo -e "${YELLOW}================================================================${NC}"
-
-    if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then    
-        echo -e "${CYAN}You are currently logged in as ${GREEN}$USER${NC}"
-        echo -e "${CYAN}Please switch to the user account.${NC}"
-        echo -e "${YELLOW}================================================================${NC}"
-        echo -e "${NC}"
-        exit
-    fi
-
+    check_user
     cd
     echo -e "${NC}"
     pm2 stop watchdog > /dev/null 2>&1 && sleep 2
@@ -898,24 +874,8 @@ function install_node(){
 
 echo -e "${GREEN}Module: Install FluxNode${NC}"
 echo -e "${YELLOW}================================================================${NC}"
-
-if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
-	echo -e "${CYAN}You are currently logged in as ${GREEN}$USER${NC}"
-	echo -e "${CYAN}Please switch to the user account.${NC}"
-	echo -e "${YELLOW}================================================================${NC}"
-	echo -e "${NC}"
-	exit
-fi
-
-if [[ $(lsb_release -d) != *Debian* && $(lsb_release -d) != *Ubuntu* ]]; then
-
-	echo -e "${WORNING} ${CYAN}ERROR: ${RED}OS version $(lsb_release -si) not supported${NC}"
-	echo -e "${CYNA}Ubuntu 20.04 LTS is the recommended OS version .. please re-image and retry installation"
-	echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
-	echo
-	exit
-fi
-
+check_user
+check_release
 
 if docker run hello-world > /dev/null 2>&1
 then
@@ -946,17 +906,7 @@ if [[ "$USER" != "root" ]]; then
     exit
 fi
 
-
-
-if [[ $(lsb_release -d) != *Debian* && $(lsb_release -d) != *Ubuntu* ]]; then
-
-	echo -e "${WORNING} ${CYAN}ERROR: ${RED}OS version $(lsb_release -si) not supported${NC}"
-	echo -e "${CYNA}Ubuntu 20.04 LTS is the recommended OS version .. please re-image and retry installation"
-	echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
-	echo
-	exit
-
-fi
+check_release
 
 if [[ -z "$usernew" ]]; then
     usernew="$(whiptail --title "MULTITOOLBOX $dversion" --inputbox "Enter your username" 8 72 3>&1 1>&2 2>&3)"
@@ -1054,14 +1004,7 @@ function daemon_reconfiguration()
 
 echo -e "${GREEN}Module: Flux Daemon Reconfiguration${NC}"
 echo -e "${YELLOW}================================================================${NC}"
-
-if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
-    echo -e "${CYAN}You are currently logged in as ${GREEN}$USER${NC}"
-    echo -e "${CYAN}Please switch to the user account.${NC}"
-    echo -e "${YELLOW}================================================================${NC}"
-    echo -e "${NC}"
-    exit
-fi
+check_user
 
 echo
 echo -e "${ARROW} ${YELLOW}Fill in all the fields that you want to replace${NC}"
@@ -1174,18 +1117,9 @@ echo -e "" && echo -e ""
  
  function update_binary(){
  
- echo -e "${GREEN}Module: Update flux daemon and benchmark binary${NC}"
- echo -e "${YELLOW}================================================================${NC}"
- 
-  if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
-    echo -e "${CYAN}You are currently logged in as ${GREEN}$USER${NC}"
-    echo -e "${CYAN}Please switch to the user account.${NC}"
-    echo -e "${YELLOW}================================================================${NC}"
-    echo -e "${NC}"
-    exit
-  fi 
- 
-
+  echo -e "${GREEN}Module: Update flux daemon and benchmark binary${NC}"
+  echo -e "${YELLOW}================================================================${NC}"
+  check_user
   echo -e "${ARROW} ${CYAN}Stopping flux daemon..${NC}"
   sudo systemctl stop zelcash > /dev/null 2>&1
  
@@ -1227,25 +1161,15 @@ fi
   echo -e "${ARROW} ${CYAN}Starting flux daemon..${NC}"
   echo ""
   sudo systemctl start zelcash > /dev/null 2>&1
-
  }
  
  
  function mongod_db_fix() {
   echo -e "${GREEN}Module: Recover corrupted MongoDB database${NC}"
   echo -e "${YELLOW}================================================================${NC}"
- 
- if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
-    echo -e "${CYAN}You are currently logged in as ${GREEN}$USER${NC}"
-    echo -e "${CYAN}Please switch to the user account.${NC}"
-    echo -e "${YELLOW}================================================================${NC}"
-    echo -e "${NC}"
-    exit
-  fi 
- 
+  check_user
   echo -e ""
   sudo -u mongodb mongod --dbpath /var/lib/mongodb --repair
- 
  }
 
 

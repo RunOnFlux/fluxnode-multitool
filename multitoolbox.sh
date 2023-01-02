@@ -243,13 +243,7 @@ function install_flux() {
 	fi
 }
 function create_config() {
-	if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
-		echo -e "${CYAN}You are currently logged in as ${GREEN}$USER${NC}"
-		echo -e "${CYAN}Please switch to the user account.${NC}"
-		echo -e "${YELLOW}================================================================${NC}"
-		echo -e "${NC}"
-		exit
-	fi
+	check_user
 	echo -e "${GREEN}Module: Create FluxNode installation config file${NC}"
 	echo -e "${YELLOW}================================================================${NC}"
 	if jq --version > /dev/null 2>&1; then
@@ -503,13 +497,7 @@ function create_config() {
 	echo -e  
 }
 function install_watchdog() {
-	if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
-		echo -e "${CYAN}You are currently logged in as ${GREEN}$USER${NC}"
-		echo -e "${CYAN}Please switch to the user account.${NC}"
-		echo -e "${YELLOW}================================================================${NC}"
-		echo -e "${NC}"
-		exit
-	fi
+	check_user
 	echo -e "${GREEN}Module: Install watchdog for FluxNode${NC}"
 	echo -e "${YELLOW}================================================================${NC}"
 	if ! pm2 -v > /dev/null 2>&1; then
@@ -695,13 +683,7 @@ function install_watchdog() {
 function flux_daemon_bootstrap() {
 	echo -e "${GREEN}Module: Restore Flux blockchain from bootstrap${NC}"
 	echo -e "${YELLOW}================================================================${NC}"
-	if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then    
-		echo -e "${CYAN}You are currently logged in as ${GREEN}$USER${NC}"
-		echo -e "${CYAN}Please switch to the user account.${NC}"
-		echo -e "${YELLOW}================================================================${NC}"
-		echo -e "${NC}"
-		exit
-	fi
+	check_user
 	cd
 	echo -e "${NC}"
 	config_veryfity
@@ -710,27 +692,8 @@ function flux_daemon_bootstrap() {
 function install_node(){
 	echo -e "${GREEN}Module: Install FluxNode${NC}"
 	echo -e "${YELLOW}================================================================${NC}"
-	if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
-		echo -e "${CYAN}You are currently logged in as ${GREEN}$USER${NC}"
-		echo -e "${CYAN}Please switch to the user account.${NC}"
-		echo -e "${YELLOW}================================================================${NC}"
-		echo -e "${NC}"
-		exit
-	fi
-	if [[ $(lsb_release -d) != *Debian* && $(lsb_release -d) != *Ubuntu* ]]; then
-		echo -e "${WORNING} ${CYAN}ERROR: ${RED}OS version $(lsb_release -si) not supported${NC}"
-		eecho -e "${CYNA}Ubuntu 20.04 LTS is the recommended OS version .. please re-image and retry installation"
-		echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
-		echo
-		exit
-	fi
-	if [[ $(lsb_release -cs) == "jammy" || $(lsb_release -cs) == "kinetic" ]]; then
-		echo -e "${WORNING} ${CYAN}ERROR: ${RED}OS version $(lsb_release -si) - $(lsb_release -cs) not supported${NC}"
-		echo -e "${CYNA}Ubuntu 20.04 LTS is the recommended OS version .. please re-image and retry installation"
-		echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
-		echo
-		exit
-	fi
+	check_user
+	check_release
 	if sudo docker run hello-world > /dev/null 2>&1; then
 		echo -e ""
 	else
@@ -749,20 +712,7 @@ function install_docker(){
 		echo -e "${NC}"
 		exit
 	fi
-	if [[ $(lsb_release -d) != *Debian* && $(lsb_release -d) != *Ubuntu* ]]; then
-		echo -e "${WORNING} ${CYAN}ERROR: ${RED}OS version $(lsb_release -si) not supported${NC}"
-		echo -e "${CYNA}Ubuntu 20.04 LTS is the recommended OS version .. please re-image and retry installation"
-		echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
-		echo
-		exit
-	fi
-	if [[ $(lsb_release -cs) == "jammy" || $(lsb_release -cs) == "kinetic" ]]; then
-		echo -e "${WORNING} ${CYAN}ERROR: ${RED}OS version $(lsb_release -si) - $(lsb_release -cs) not supported${NC}"
-		echo -e "${CYNA}Ubuntu 20.04 LTS is the recommended OS version .. please re-image and retry installation"
-		echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
-		echo
-		exit
-	fi
+	check_release
 	if [[ -z "$usernew" ]]; then
 		usernew="$(whiptail --title "MULTITOOLBOX $dversion" --inputbox "Enter your username" 8 72 3>&1 1>&2 2>&3)"
 		usernew=$(awk '{print tolower($0)}' <<< "$usernew")
@@ -838,15 +788,9 @@ function install_docker(){
 	fi
 }
 function install_watchtower(){
- echo -e "${GREEN}Module: Install flux_watchtower for docker images autoupdate${NC}"
- echo -e "${YELLOW}================================================================${NC}"
-	if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
-		echo -e "${CYAN}You are currently logged in as ${GREEN}$USER${NC}"
-		echo -e "${CYAN}Please switch to the user account.${NC}"
-		echo -e "${YELLOW}================================================================${NC}"
-		echo -e "${NC}"
-		exit
-	fi 
+	echo -e "${GREEN}Module: Install flux_watchtower for docker images autoupdate${NC}"
+	echo -e "${YELLOW}================================================================${NC}"
+	check_user
 	echo -e ""
 	echo -e "${ARROW} ${CYAN}Checking if flux_watchtower is installed....${NC}"
 	apps_check=$(docker ps | grep "flux_watchtower")
@@ -878,14 +822,7 @@ function install_watchtower(){
 function mongod_db_fix() {
 	echo -e "${GREEN}Module: MongoDB FiX action${NC}"
 	echo -e "${YELLOW}================================================================${NC}"
- if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
-		echo -e "${CYAN}You are currently logged in as ${GREEN}$USER${NC}"
-		echo -e "${CYAN}Please switch to the user account.${NC}"
-		echo -e "${YELLOW}================================================================${NC}"
-		echo -e "${NC}"
-		exit
-	fi 
-
+	check_user
 
 	 CHOICE=$(
  whiptail --title "MongoDB FiX action" --menu "Make your choice" 15 65 8 \
@@ -949,6 +886,9 @@ function mongod_db_fix() {
 
 }
 function node_reconfiguration() {
+	echo -e "${GREEN}Module: Node reconfiguration from install config${NC}"
+	echo -e "${YELLOW}================================================================${NC}"
+	check_user
 	reset=""
 	if [[ -f /home/$USER/install_conf.json ]]; then
 		import_config_file "silent"
@@ -1137,15 +1077,6 @@ case "$REPLY" in
  	15)
 	clear
 	sleep 1
-	echo -e "${GREEN}Module: Node reconfiguration from install config${NC}"
-	echo -e "${YELLOW}================================================================${NC}"
-	if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then    
-		echo -e "${CYAN}You are currently logged in as ${GREEN}$USER${NC}"
-		echo -e "${CYAN}Please switch to the user account.${NC}"
-		echo -e "${YELLOW}================================================================${NC}"
-		echo -e "${NC}"
-		exit
-	fi
 	node_reconfiguration
 	echo -e ""
  ;;

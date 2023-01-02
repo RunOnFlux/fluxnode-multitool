@@ -642,6 +642,32 @@ function  fluxos_clean(){
    fi
 }
 
+function check_user(){
+	if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
+			echo -e "${CYAN}You are currently logged in as ${GREEN}$USER${NC}"
+			echo -e "${CYAN}Please switch to the user account.${NC}"
+			echo -e "${YELLOW}================================================================${NC}"
+			echo -e "${NC}"
+			exit
+	fi
+}
+
+function check_release(){
+	if [[ $(lsb_release -d) != *Debian* && $(lsb_release -d) != *Ubuntu* ]]; then
+		echo -e "${WORNING} ${CYAN}ERROR: ${RED}OS version $(lsb_release -si) not supported${NC}"
+		eecho -e "${CYNA}Ubuntu 20.04 LTS is the recommended OS version .. please re-image and retry installation"
+		echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
+		echo
+		exit
+	fi
+	if [[ $(lsb_release -cs) == "jammy" || $(lsb_release -cs) == "kinetic" ]]; then
+		echo -e "${WORNING} ${CYAN}ERROR: ${RED}OS version $(lsb_release -si) - $(lsb_release -cs) not supported${NC}"
+		echo -e "${CYNA}Ubuntu 20.04 LTS is the recommended OS version .. please re-image and retry installation"
+		echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
+		echo
+		exit
+	fi
+}
 function round() {
 	printf "%.${2}f" "${1}"
 }
@@ -1018,13 +1044,7 @@ function create_swap() {
 function daemon_reconfiguration(){
 	echo -e "${GREEN}Module: Flux Daemon Reconfiguration${NC}"
 	echo -e "${YELLOW}================================================================${NC}"
-	if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
-		echo -e "${CYAN}You are currently logged in as ${GREEN}$USER${NC}"
-		echo -e "${CYAN}Please switch to the user account.${NC}"
-		echo -e "${YELLOW}================================================================${NC}"
-		echo -e "${NC}"
-		exit
-	fi
+	check_user
 	config_veryfity
 	echo -e ""
 	echo -e "${ARROW} ${YELLOW}Fill in all the fields that you want to replace${NC}"
@@ -1148,13 +1168,7 @@ function replace_zelid() {
 function fluxos_reconfiguration {
  echo -e "${GREEN}Module: FluxOS reconfiguration${NC}"
  echo -e "${YELLOW}================================================================${NC}"
- if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
-		echo -e "${CYAN}You are currently logged in as ${GREEN}$USER${NC}"
-		echo -e "${CYAN}Please switch to the user account.${NC}"
-		echo -e "${YELLOW}================================================================${NC}"
-		echo -e "${NC}"
-		exit
- fi
+ check_user
  if ! [[ -f /home/$USER/zelflux/config/userconfig.js ]]; then
 	 echo -e "${WORNING} ${CYAN}FluxOS userconfig.js not exist, operation aborted${NC}"
 	 echo -e ""
@@ -1754,13 +1768,7 @@ function create_service() {
 	if [[ "$1" != "install" ]]; then
 		echo -e "${GREEN}Module: Flux Daemon service creator${NC}"
 		echo -e "${YELLOW}================================================================${NC}"
-		if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
-			echo -e "${CYAN}You are currently logged in as ${GREEN}$USER${NC}"
-			echo -e "${CYAN}Please switch to the user account.${NC}"
-			echo -e "${YELLOW}================================================================${NC}"
-			echo -e "${NC}"
-			exit
-		fi 
+		check_user
 		echo -e ""
 		echo -e "${ARROW} ${CYAN}Cleaning...${NC}" && sleep 1
 		sudo systemctl stop zelcash > /dev/null 2>&1 && sleep 2
@@ -1982,13 +1990,7 @@ function selfhosting_creator(){
 	echo -e "${GREEN}Module: Self-hosting ip cron service${NC}"
 	echo -e "${YELLOW}================================================================${NC}"
 	echo -e ""
-	if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
-		echo -e "${CYAN}You are currently logged in as ${GREEN}$USER${NC}"
-		echo -e "${CYAN}Please switch to the user account.${NC}"
-		echo -e "${YELLOW}================================================================${NC}"
-		echo -e "${NC}"
-		exit
-	fi
+	check_user
 
 	CHOICE=$(
 	whiptail --title "FluxOS Selfhosting Configuration" --menu "Make your choice" 15 40 6 \
@@ -2144,13 +2146,7 @@ function selfhosting() {
 function multinode(){
 	echo -e "${GREEN}Module: Multinode configuration with UPNP communication (Needs Router with UPNP support)${NC}"
 	echo -e "${YELLOW}================================================================${NC}"
-	if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
-		echo -e "${CYAN}You are currently logged in as ${GREEN}$USER${NC}"
-		echo -e "${CYAN}Please switch to the user account.${NC}"
-		echo -e "${YELLOW}================================================================${NC}"
-		echo -e "${NC}"
-		exit
-	fi
+	check_user
 	echo -e ""
 	echo -e "${ARROW}  ${CYAN}OPTION ALLOWS YOU: ${NC}"
 	echo -e "${HOT} ${CYAN}Run node as selfhosting with upnp communication ${NC}"
@@ -2174,13 +2170,7 @@ function multinode(){
 function install_watchtower(){
 	echo -e "${GREEN}Module: Install flux_watchtower for docker images autoupdate${NC}"
 	echo -e "${YELLOW}================================================================${NC}"
-	if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
-		echo -e "${CYAN}You are currently logged in as ${GREEN}$USER${NC}"
-		echo -e "${CYAN}Please switch to the user account.${NC}"
-		echo -e "${YELLOW}================================================================${NC}"
-		echo -e "${NC}"
-		exit
-	fi 
+	check_user
 	echo -e ""
 	echo -e "${ARROW} ${CYAN}Checking if flux_watchtower is installed....${NC}"
 	apps_check=$(docker ps | grep "flux_watchtower")
@@ -2211,12 +2201,7 @@ function install_watchtower(){
 function analyzer_and_fixer(){
 	echo -e "${GREEN}Module: FluxNode analyzer and fixer${NC}"
 	echo -e "${YELLOW}================================================================${NC}"
-	if [[ "$USER" == "root" || "$USER" == "ubuntu" || "$USER" == "admin" ]]; then
-		echo -e "${CYAN}You are currently logged in as ${GREEN}$USER${NC}"
-		echo -e "${CYAN}Please switch to the user account.${NC}"
-		echo -e "${YELLOW}================================================================${NC}"
-		echo -e "${NC}"
-		exit
-	fi
+	check_user
+	check_release
 	bash -i <(curl -s https://raw.githubusercontent.com/RunOnFlux/fluxnode-multitool/${ROOT_BRANCH}/nodeanalizerandfixer.sh)
 }
