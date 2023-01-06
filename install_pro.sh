@@ -821,8 +821,8 @@ log_rotate "Docker" "docker_debug_log" "/var/lib/docker/containers/*/*.log" "dai
 basic_security
 status_loop
 install_watchdog
-finalizing
 if [[ "$gateway_ip" != "" && "$upnp_port" != "" ]] && [[ "$upnp_port" != "null" ]] ; then
-	upnp_enable
+	upnp_enable "install"
 fi
+finalizing
 display_banner

@@ -2173,20 +2173,25 @@ function upnp_enable() {
 			sudo ufw allow from $router_ip to any proto udp > /dev/null 2>&1
 		fi
 	fi
-	sudo systemctl restart zelcash  > /dev/null 2>&1
-	pm2 restart flux  > /dev/null 2>&1
-	sleep 150
-	echo -e "${ARROW}${CYAN} Checking FluxOS logs... ${NC}"
-	error_check=$(tail -n10 /home/$USER/.pm2/logs/flux-out.log | grep "UPnP failed")
-	if [[ "$error_check" == "" ]]; then
-		echo -e ""
-		LOCAL_IP=$(ip -o route get to 8.8.8.8 | sed -n 's/.*src \([0-9.]\+\).*/\1/p')
-		ZELFRONTPORT=$(($FLUX_PORT-1))
-		echo -e "${PIN} ${CYAN}To access your FluxOS use this url: ${SEA}http://${LOCAL_IP}:$ZELFRONTPORT${NC}"
-		echo -e ""
+	if [[ "$1" != "install" ]]; then
+		sudo systemctl restart zelcash  > /dev/null 2>&1
+		pm2 restart flux  > /dev/null 2>&1
+		sleep 150
+		echo -e "${ARROW}${CYAN} Checking FluxOS logs... ${NC}"
+		error_check=$(tail -n10 /home/$USER/.pm2/logs/flux-out.log | grep "UPnP failed")
+		if [[ "$error_check" == "" ]]; then
+			echo -e ""
+			LOCAL_IP=$(ip -o route get to 8.8.8.8 | sed -n 's/.*src \([0-9.]\+\).*/\1/p')
+			ZELFRONTPORT=$(($FLUX_PORT-1))
+			echo -e "${PIN} ${CYAN}To access your FluxOS use this url: ${SEA}http://${LOCAL_IP}:$ZELFRONTPORT${NC}"
+			echo -e ""
+		else
+			echo -e "${WORNING} ${RED}Problem with UPnP detected, FluxOS Shutting down...${NC}"
+			echo -e ""
+		fi
 	else
-		echo -e "${WORNING} ${RED}Problem with UPnP detected, FluxOS Shutting down...${NC}"
-		echo -e ""
+			LOCAL_IP=$(ip -o route get to 8.8.8.8 | sed -n 's/.*src \([0-9.]\+\).*/\1/p')
+			ZELFRONTPORT=$(($FLUX_PORT-1))
 	fi
 }
 #### TESTNET
