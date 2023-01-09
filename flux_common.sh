@@ -93,6 +93,10 @@ function fluxos_conf_create(){
 	  }
 	}
 	EOF
+	
+	if [[ "$thunder" != "" ]]; then
+          config_builder "thunder" "$thunder" "Thunder Mode" "benchmark"
+        fi	
 }
 function flux_daemon_conf_create() {
 	RPCUSER=$(pwgen -1 8 -n)
