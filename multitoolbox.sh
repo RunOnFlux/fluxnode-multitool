@@ -242,11 +242,14 @@ function install_flux() {
 		fi
 	fi
 }
+
+
 function create_config() {
 	check_user
 	echo -e "${GREEN}Module: Create FluxNode installation config file${NC}"
 	echo -e "${YELLOW}================================================================${NC}"
 	if jq --version > /dev/null 2>&1; then
+  
 		sleep 0.2
 	else
 		echo -e "${ARROW} ${YELLOW}Installing JQ....${NC}"
@@ -262,240 +265,22 @@ function create_config() {
 			exit
 		fi
 	fi
-	skip_zelcash_config='0'
-	skip_bootstrap='0'
-	if [[ -d /home/$USER/$CONFIG_DIR ]]; then
-		if whiptail --yesno "Would you like import old settings from daemon and Flux?" 8 65; then
-			import_settings='1'
-			skip_zelcash_config='1'
-			sleep 1
-		else
-			import_settings='0'
-			sleep 1
-		fi
-		if whiptail --yesno "Would you like use exist Flux chain?" 8 65; then
-			use_old_chain='1'
-			skip_bootstrap='1'
-			sleep 1
-		else
-			use_old_chain='0'
-			sleep 1
-		fi
-	fi
 
-	if [[ "$skip_zelcash_config" == "1" ]]; then
-		prvkey=""
-		outpoint=""
-		index=""
-		zelid=""
-		kda_address=""
-		node_label="0" 
-		fix_action="1"      
-		eps_limit="0"
-		discord="0"
-		ping="0"
-		telegram_alert="0"    
-		telegram_bot_token="0"	      	      
-		telegram_chat_id="0"	
-	else
-		prvkey=$(whiptail --inputbox "Enter your FluxNode Identity Key from Zelcore" 8 65 3>&1 1>&2 2>&3)
-		sleep 1
-		outpoint=$(whiptail --inputbox "Enter your FluxNode Collateral TX ID from Zelcore" 8 72 3>&1 1>&2 2>&3)
-		sleep 1
-		index=$(whiptail --inputbox "Enter your FluxNode Output Index from Zelcore" 8 65 3>&1 1>&2 2>&3)
-		sleep 1
-		while true
-		do
-			zel_id=$(whiptail --title "Flux Configuration" --inputbox "Enter your ZEL ID from ZelCore (Apps -> Zel ID (CLICK QR CODE)) " 8 72 3>&1 1>&2 2>&3)
-			if [ $(printf "%s" "$zel_id" | wc -c) -eq "34" ] || [ $(printf "%s" "$zel_id" | wc -c) -eq "33" ]; then
-				echo -e "${ARROW} ${CYAN}Zel ID is valid${CYAN}.........................[${CHECK_MARK}${CYAN}]${NC}"
-				break
-			else
-				echo -e "${ARROW} ${CYAN}Zel ID is not valid try again...........[${X_MARK}${CYAN}]${NC}"
-				sleep 4
-			fi
-		done
-		sleep 1
-		while true
-		do
-			KDA_A=$(whiptail --inputbox "Please enter your Kadena address from Zelcore" 8 85 3>&1 1>&2 2>&3)
-			KDA_A=$(grep -Eo "^k:[0-9a-z]{64}\b" <<< "$KDA_A")
-			if [[ "$KDA_A" != "" && "$KDA_A" != *kadena* && "$KDA_A" = *k:*  ]]; then    
-				echo -e "${ARROW} ${CYAN}Kadena address is valid.................[${CHECK_MARK}${CYAN}]${NC}"	
-				kda_address="kadena:$KDA_A?chainid=0"		    
-				sleep 2
-				break
-			else	     
-				echo -e "${ARROW} ${CYAN}Kadena address is not valid.............[${X_MARK}${CYAN}]${NC}"
-				sleep 2		     
-			fi
-		done
-		sleep 1
-		if whiptail --yesno "Would you like enable autoupdate?" 8 65; then
-			zelflux_update='1'
-			zelcash_update='1'
-			zelbench_update='1'
-		else
-			zelflux_update='0'
-			zelcash_update='0'
-			zelbench_update='0'   
-		fi
-		if whiptail --yesno "Would you like enable alert notification?" 8 65; then
-			whiptail --msgbox "Info: to select/deselect item use 'space' ...to switch to OK/Cancel use 'tab' " 10 60
-			sleep 1
-			CHOICES=$(whiptail --title "Choose options: " --separate-output --checklist "Choose options: " 10 45 5 \
-			"1" "Discord notification      " ON \
-			"2" "Telegram notification     " OFF 3>&1 1>&2 2>&3 )
-			if [[ -z "$CHOICES" ]]; then
-				echo -e "${ARROW} ${CYAN}No option was selected...Alert notification disabled! ${NC}"
-				sleep 1
-				discord="0"
-				ping="0"
-				telegram_alert="0"
-				telegram_bot_token="0"
-				telegram_chat_id="0"
-				node_label="0"
-			else
-				for CHOICE in $CHOICES; do
-				case "$CHOICE" in
-				"1")
-					discord=$(whiptail --inputbox "Enter your discord server webhook url" 8 65 3>&1 1>&2 2>&3)
-					sleep 1
-					if whiptail --yesno "Would you like enable nick ping on discord?" 8 60; then
-						while true
-						do
-							ping=$(whiptail --inputbox "Enter your discord user id" 8 60 3>&1 1>&2 2>&3)
-						if [[ $ping == ?(-)+([0-9]) ]]; then
-							string_limit_check_mark "UserID is valid..........................................."
-							break
-						else
-							string_limit_x_mark "UserID is not valid try again............................."
-							sleep 1
-						fi
-						done
-						sleep 1
-					else
-						ping="0"
-						sleep 1
-					fi
-				;;
-				"2")
-					telegram_alert="1"
-					while true
-					do
-						telegram_bot_token=$(whiptail --inputbox "Enter telegram bot token from BotFather" 8 65 3>&1 1>&2 2>&3)
-						if [[ $(grep ':' <<< "$telegram_bot_token") != "" ]]; then
-						string_limit_check_mark "Bot token is valid..........................................."
-						break
-						else
-							string_limit_x_mark "Bot token is not valid try again............................."
-							sleep 1
-						fi
-					done
-					sleep 1
-					while true
-					do
-						telegram_chat_id=$(whiptail --inputbox "Enter your chat id from GetIDs Bot" 8 60 3>&1 1>&2 2>&3)
-						if [[ $telegram_chat_id == ?(-)+([0-9]) ]]; then
-							string_limit_check_mark "Chat ID is valid..........................................."
-							break
-						else
-							string_limit_x_mark "Chat ID is not valid try again............................."
-							sleep 1
-						fi
-					done
-				 sleep 1
-				;;
-				esac
-				done
-			fi
-			while true
-			do
-			node_label=$(whiptail --inputbox "Enter name of your node (alias)" 8 65 3>&1 1>&2 2>&3)
-			if [[ "$node_label" != "" && "$node_label" != "0"  ]]; then
-				string_limit_check_mark "Node name is valid..........................................."
-				break
-			else
-				string_limit_x_mark "Node name is not valid try again............................."
-				sleep 1
-			fi
-			done
-		else
-			discord="0"
-			ping="0"
-			telegram_alert="0"
-			telegram_bot_token="0"
-			telegram_chat_id="0"
-			node_label="0"
-			sleep 1
-		fi
+ CHOICE=$(whiptail --title "Create FluxNode installation config" --menu "Make your choice" 15 65 8 \
+ "1)" "Manualy - fill questions list"   \
+ "2)" "Auto - import exists settings"  3>&2 2>&1 1>&3 )
+		case $CHOICE in
+		"1)")
+                manual_build
+		;;
+		"2)")
+		config_smart_create
+		;;
+	        esac
 
-		if [[ "$discord" == 0 ]]; then
-			ping="0"
-		fi
-
-		if [[ "$telegram_alert" == 0 || "$telegram_alert" == "" ]]; then
-			telegram_alert="0"
-			telegram_bot_token="0"
-			telegram_chat_id="0"
-		fi
-
-		index_from_file="$index"
-		tx_from_file="$outpoint"
-		stak_info=$(curl -sSL -m 5 https://$network_url_1/api/tx/$tx_from_file | jq -r ".vout[$index_from_file] | .value,.n,.scriptPubKey.addresses[0],.spentTxId" | paste - - - - | awk '{printf "%0.f %d %s %s\n",$1,$2,$3,$4}' | grep 'null' | egrep -o '1000|12500|40000')
-		if [[ "$stak_info" == "" ]]; then
-			stak_info=$(curl -sSL -m 5 https://$network_url_2/api/tx/$tx_from_file | jq -r ".vout[$index_from_file] | .value,.n,.scriptPubKey.addresses[0],.spentTxId" | paste - - - - | awk '{printf "%0.f %d %s %s\n",$1,$2,$3,$4}' | grep 'null' | egrep -o '1000|12500|40000')
-		fi	
-		if [[ $stak_info == ?(-)+([0-9]) ]]; then
-			case $stak_info in
-			"1000") eps_limit=90 ;;
-			"12500")  eps_limit=180 ;;
-			"40000") eps_limit=300 ;;
-			esac
-		else
-			eps_limit=0;
-		fi
-	fi
-	if [[ "$skip_bootstrap" == "0" ]]; then
-		if whiptail --yesno "Would you like use Flux bootstrap from script source?" 8 65; then
-			bootstrap_url=""
-			sleep 1
-		else
-			bootstrap_url=$(whiptail --inputbox "Enter your Flux bootstrap URL" 8 65 3>&1 1>&2 2>&3)
-			sleep 1
-		fi
-		if whiptail --yesno "Would you like keep bootstrap archive file localy?" 8 65; then
-			bootstrap_zip_del='0'
-			sleep 1
-		else
-			bootstrap_zip_del='1'
-			sleep 1
-		fi
-	fi
-	if whiptail --yesno "Would you like to enable UPnP for this node?" 8 65; then
-	  router_ip=$(ip rout | head -n1 | awk '{print $3}' 2>/dev/null)
-		gateway_ip=$(whiptail --inputbox "Enter your UPnP Gateway IP: (This is usually your router: $router_ip)" 8 85 3>&1 1>&2 2>&3)
-		upnp_port=$(whiptail --title "Enter your FluxOS UPnP Port" --radiolist \
-		"Use the UP/DOWN arrows to highlight the port you want. Press Spacebar on the port you want to select, THEN press ENTER." 17 50 8 \
-		"16127" "" ON \
-		"16137" "" OFF \
-		"16147" "" OFF \
-		"16157" "" OFF \
-		"16167" "" OFF \
-		"16177" "" OFF \
-		"16187" "" OFF \
-		"16197" "" OFF 3>&1 1>&2 2>&3)
-	else
-		gateway_ip=""
-		upnp_port=""
-	fi
-	firewall_disable='1'
-	swapon='1'
-	rm /home/$USER/install_conf.json > /dev/null 2>&1
-	install_conf_create
-	config_file
-	echo -e  
 }
+
+
 function install_watchdog() {
 	check_user
 	echo -e "${GREEN}Module: Install watchdog for FluxNode${NC}"

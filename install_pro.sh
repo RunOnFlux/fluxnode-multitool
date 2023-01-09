@@ -822,7 +822,7 @@ basic_security
 status_loop
 install_watchdog
 finalizing
-if [[ "$gateway_ip" != "" && "$upnp_port" != "" ]]; then
+if [[ "$gateway_ip" != "" && "$upnp_port" != "" ]] && [[ "$upnp_port" != "null" ]] ; then
 	upnp_enable
 fi
 display_banner

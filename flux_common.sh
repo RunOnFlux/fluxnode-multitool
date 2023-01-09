@@ -290,7 +290,7 @@ function config_builder() {
      fi
      if [[ $(cat /home/$USER/$FLUX_DIR/config/userconfig.js | grep "$key") == "" ]]; then
        insert "/home/$USER/$FLUX_DIR//config/userconfig.js" "testnet" "  $key: '$value',"
-       padding "${ARROW}${GREEN} [FluxOS] ${CYAN}$3 added successfully${NC}" "${CHECK_MARK}"
+       padding "${ARROW}${GREEN} [FluxOS] ${CYAN}$3 was added successfully${NC}" "${CHECK_MARK}"
        return
      fi
      if [[ $(cat /home/$USER/$FLUX_DIR/config/userconfig.js | grep "$key: '$value'") != "" ]]; then
@@ -300,7 +300,7 @@ function config_builder() {
      if [[ $(cat /home/$USER/$FLUX_DIR//config/userconfig.js | grep "$key") != "" ]]; then
         sed -i "s/$(grep -e $key /home/$USER/$FLUX_DIR/config/userconfig.js)/  $key: '$value',/" /home/$USER/$FLUX_DIR/config/userconfig.js
         if [[ $(grep -w $value /home/$USER/$FLUX_DIR/config/userconfig.js) != "" ]]; then
-          padding "${ARROW}${GREEN} [FluxOS] ${CYAN}$3 replaced successfully${NC}" "${CHECK_MARK}"
+          padding "${ARROW}${GREEN} [FluxOS] ${CYAN}$3 was replaced successfully${NC}" "${CHECK_MARK}"
         fi
      fi
   fi
@@ -317,7 +317,7 @@ function config_builder() {
     if [[ ! $(grep -w $1 /home/$USER/$CONFIG_DIR/$CONFIG_FILE) && -f /home/$USER/$CONFIG_DIR/$CONFIG_FILE ]]; then
       echo "$1=$2" >> /home/$USER/$CONFIG_DIR/$CONFIG_FILE
       if [[ "$1=$2" == $(grep -w $1 /home/$USER/$CONFIG_DIR/$CONFIG_FILE) ]]; then
-         padding "${ARROW}${GREEN} [Daemon] ${CYAN}$3 added successful${NC}" "${CHECK_MARK}"
+         padding "${ARROW}${GREEN} [Daemon] ${CYAN}$3 was added successfully${NC}" "${CHECK_MARK}"
 	 return
       fi
     fi
@@ -327,7 +327,7 @@ function config_builder() {
     else
        sed -i "s/$(grep -e $1 /home/$USER/$CONFIG_DIR/$CONFIG_FILE)/$1=$2/" /home/$USER/$CONFIG_DIR/$CONFIG_FILE
        if [[ "$1=$2" == $(grep -w $1 /home/$USER/$CONFIG_DIR/$CONFIG_FILE) ]]; then
-         padding "${ARROW}${GREEN} [Daemon] ${CYAN}$3 replaced successful${NC}" "${CHECK_MARK}"
+         padding "${ARROW}${GREEN} [Daemon] ${CYAN}$3 was replaced successfully${NC}" "${CHECK_MARK}"
        fi
     fi
   fi
@@ -338,17 +338,17 @@ function config_builder() {
        return
     fi
     if [[ ! -f /home/$USER/.fluxbenchmark/fluxbench.conf ]]; then
-      mkdir -p /home/$USER/.fluxbenchmark/fluxbench.conf > /dev/null 2>&1
+      mkdir -p /home/$USER/.fluxbenchmark > /dev/null 2>&1
       echo "$1=$2" >> /home/$USER/.fluxbenchmark/fluxbench.conf
       if [[ "$1=$2" == $(grep -w $1 /home/$USER/.fluxbenchmark/fluxbench.conf) ]]; then
-         padding "${ARROW}${GREEN} [BenchD] ${CYAN}$3 added successful${NC}" "${CHECK_MARK}"
+         padding "${ARROW}${GREEN} [BenchD] ${CYAN}$3 was added successfully${NC}" "${CHECK_MARK}"
 	 return
       fi
     fi
     if [[ ! $(grep -w $1 /home/$USER/.fluxbenchmark/fluxbench.conf) ]]; then
       echo "$1=$2" >> /home/$USER/.fluxbenchmark/fluxbench.conf
       if [[ "$1=$2" == $(grep -w $1 /home/$USER/.fluxbenchmark/fluxbench.conf) ]]; then
-         padding "${ARROW}${GREEN} [BenchD] ${CYAN}$3 added successful${NC}" "${CHECK_MARK}"
+         padding "${ARROW}${GREEN} [BenchD] ${CYAN}$3 was added successfully${NC}" "${CHECK_MARK}"
 	 return
       fi
     fi
@@ -357,7 +357,7 @@ function config_builder() {
     else
        sed -i "s/$(grep -e $1 /home/$USER/.fluxbenchmark/fluxbench.conf)/$1=$2/" /home/$USER/.fluxbenchmark/fluxbench.conf
        if [[ "$1=$2" == $(grep -w $1 /home/$USER/.fluxbenchmark/fluxbench.conf) ]]; then
-         padding "${ARROW}${GREEN} [BenchD] ${CYAN}$3 replaced successful${NC}" "${CHECK_MARK}"
+         padding "${ARROW}${GREEN} [BenchD] ${CYAN}$3 was replaced successfully${NC}" "${CHECK_MARK}"
        fi
     fi
   fi
@@ -378,7 +378,7 @@ function config_builder() {
     if [[ $(cat /home/$USER/watchdog/config.js | grep "$1") != "" ]]; then
       sed -i "s/$(grep -e $1 /home/$USER/watchdog/config.js)/  $1: '$2',/" /home/$USER/watchdog/config.js
       if [[ $(grep -w $2 /home/$USER/watchdog/config.js) != "" ]]; then
-        padding "${ARROW}${GREEN} [WatchD] ${CYAN}$3 replaced successfully${NC}" "${CHECK_MARK}"
+        padding "${ARROW}${GREEN} [WatchD] ${CYAN}$3 was replaced successfully${NC}" "${CHECK_MARK}"
       fi
     fi
   fi
@@ -400,9 +400,9 @@ function smart_reconfiguration(){
   "zelflux_update": [{"key": "zelflux_update", "label": "FluxOS Auto Update"}],
   "zelcash_update": [{"key": "zelcash_update", "label": "Daemon Auto Update"}],
   "zelbench_update": [{"key": "zelbench_update", "label": "Benchmark Auto Update"}],
-  "fluxport": [{"key": "zelbench_update", "label": "Multi Node Port"}],
-  "thunder": [{"key": "zelbench_update", "label": "Thunder Mode"}],
-  "speedtestserverid": [{"key": "zelbench_update", "label": "Speed Test Server ID"}],
+  "fluxport": [{"key": "fluxport", "label": "Multi Node Port"}],
+  "thunder": [{"key": "thunder", "label": "Thunder Mode"}],
+  "speedtestserverid": [{"key": "speedtestserverid", "label": "Speed Test Server ID"}],
   "upnp_port": [{"key": "apiport", "label": "UPnP Port"}]
  }
 END
@@ -450,28 +450,35 @@ END
 }
 
 function smart_install_conf(){
+
+        if [[ "$3" == "import" ]]; then
+	  return
+	fi
+	
         if [[ ! -f /home/$USER/install_conf.json ]]; then
                 echo "{}" > install_conf.json
         fi
-        echo "$(jq -r --arg key "$1"--arg value "$2" '.[$key]=$value' install_conf.json)" > install_conf.json
+        echo "$(jq -r --arg key "$1" --arg value "$2" '.[$key]=$value' install_conf.json)" > install_conf.json
 }
 
 function config_smart_create() {
 
-        rm -rf /home/$USER/install_conf.json
+        if [[ "$1" != "import" ]]; then
+          rm -rf /home/$USER/install_conf.json
+	fi
         #daemon
         if [[ -f /home/$USER/$CONFIG_DIR/$CONFIG_FILE ]]; then
                 echo -e ""
                 echo -e "${ARROW} ${YELLOW}Imported daemon settings:${NC}"
                 zelnodeprivkey=$(grep -w zelnodeprivkey /home/$USER/$CONFIG_DIR/$CONFIG_FILE | sed -e 's/zelnodeprivkey=//' | sed 's/ //g')
                 echo -e "${PIN}${CYAN} Identity Key = ${GREEN}$zelnodeprivkey${NC}"
-                smart_install_conf "prvkey" "$zelnodeprivkey"
+                smart_install_conf "prvkey" "$zelnodeprivkey" "$1"
                 zelnodeoutpoint=$(grep -w zelnodeoutpoint /home/$USER/$CONFIG_DIR/$CONFIG_FILE | sed -e 's/zelnodeoutpoint=//' | sed 's/ //g')
                 echo -e "${PIN}${CYAN} Collateral TX ID = ${GREEN}$zelnodeoutpoint${NC}"
-                smart_install_conf "outpoint" "$zelnodeoutpoint"
+                smart_install_conf "outpoint" "$zelnodeoutpoint" "$1"
                 zelnodeindex=$(grep -w zelnodeindex /home/$USER/$CONFIG_DIR/$CONFIG_FILE | sed -e 's/zelnodeindex=//' | sed 's/ //g')
                 echo -e "${PIN}${CYAN} Output Index = ${GREEN}$zelnodeindex${NC}"
-                smart_install_conf "index" "$zelnodeindex"
+                smart_install_conf "index" "$zelnodeindex" "$1"
         fi
 	#Benchmark
 	if [[ -f /home/$USER/.fluxbenchmark/fluxbench.conf ]]; then
@@ -479,18 +486,18 @@ function config_smart_create() {
            echo -e "${ARROW} ${YELLOW}Imported Benchmark settings:${NC}"
 	   thunder=$(grep -Po "(?<=thunder=)\d+" /home/$USER/.fluxbenchmark/fluxbench.conf)
 	   if [[ "$thunder" == "1" ]]; then
-             echo -e "${PIN}${CYAN} Thunder Mode = ${GREEN}$ENABLED${NC}"
-             smart_install_conf "thunder" "$thunder"
+             echo -e "${PIN}${CYAN} Thunder Mode = ${GREEN}ENABLED${NC}"
+             smart_install_conf "thunder" "$thunder" "$1"
            fi
 	   speedtestserverid=$(grep -Po "(?<=speedtestserverid=)\d+" /home/$USER/.fluxbenchmark/fluxbench.conf)
 	   if [[ "$speedtestserverid" != "" ]]; then
              echo -e "${PIN}${CYAN} SpeedTest Server ID = ${GREEN}$speedtestserverid${NC}"
-             smart_install_conf "speedtestserverid" "$speedtestserverid"
+             smart_install_conf "speedtestserverid" "$speedtestserverid" "$1"
            fi
 	   fluxport=$(grep -Po "(?<=fluxport=)\d+" /home/$USER/.fluxbenchmark/fluxbench.conf)  
 	   if [[ "$fluxport" != "" ]]; then
              echo -e "${PIN}${CYAN} Flux Port = ${GREEN}$fluxport${NC}"
-             smart_install_conf "fluxport" "$fluxport"
+             smart_install_conf "fluxport" "$fluxport" "$1"
            fi 
 	fi
         #fluxOS
@@ -500,20 +507,20 @@ function config_smart_create() {
                 ZELID=$(grep -w zelid /home/$USER/$FLUX_DIR/config/userconfig.js | sed -e 's/.*zelid: .//' | sed -e 's/.\{2\}$//')
                 if [[ "$ZELID" != "" ]]; then
                         echo -e "${PIN}${CYAN} Zel ID = ${GREEN}$ZELID${NC}"
-                        smart_install_conf "zelid" "$ZELID"
+                        smart_install_conf "zelid" "$ZELID" "$1"
                 fi
                 KDA_A=$(grep -w kadena /home/$USER/$FLUX_DIR/config/userconfig.js | sed -e 's/.*kadena: .//' | sed -e 's/.\{2\}$//')
                 if [[ "$KDA_A" != "" ]]; then
                         echo -e "${PIN}${CYAN} KDA address = ${GREEN}$KDA_A${NC}"
-                        smart_install_conf "kda_address" "$KDA_A"
+                        smart_install_conf "kda_address" "$KDA_A" "$1"
                 fi
                 upnp_port=$(grep -w apiport /home/$USER/$FLUX_DIR/config/userconfig.js | sed -e 's/.*apiport: .//' | sed -e 's/.\{2\}$//')
                 if [[ "$upnp_port" != "" ]]; then
                         gateway_ip=$(ip rout | head -n1 | awk '{print $3}' 2>/dev/null)
                         echo -e "${PIN}${CYAN} UPnP port = ${GREEN}$upnp_port${NC}"
                         echo -e "${PIN}${CYAN} Gateway IP = ${GREEN}$gateway_ip${NC}"
-                        smart_install_conf "upnp_port" "$upnp_port"
-                        smart_install_conf "gateway_ip" "$gateway_ip"
+                        smart_install_conf "upnp_port" "$upnp_port" "$1"
+                        smart_install_conf "gateway_ip" "$gateway_ip" "$1"
                 fi
         fi
         #watchdog
@@ -523,7 +530,7 @@ function config_smart_create() {
                 node_label=$(grep -w label /home/$USER/watchdog/config.js | sed -e 's/.*label: .//' | sed -e 's/.\{2\}$//')
                 if [[ "$node_label" != "" && "$node_label" != "0" ]]; then
                         echo -e "${PIN}${CYAN} Label = ${GREEN}Enabled${NC}"
-                        smart_install_conf "node_label" "$node_label"
+                        smart_install_conf "node_label" "$node_label" "$1"
                 else
                         echo -e "${PIN}${CYAN} Label = ${RED}Disabled${NC}"
                 fi
@@ -531,13 +538,13 @@ function config_smart_create() {
                 eps_limit=$(grep -w tier_eps_min /home/$USER/watchdog/config.js | sed -e 's/.*tier_eps_min: .//' | sed -e 's/.\{2\}$//')
                 if [[ "$eps_limit" != "" && "$eps_limit" != "0" ]]; then
                         echo -e "${PIN}${CYAN} Tier_eps_min = ${GREEN}$eps_limit${NC}"
-                        smart_install_conf "eps_limit" "$eps_limit"
+                        smart_install_conf "eps_limit" "$eps_limit" "$1"
                 fi
 
                 discord=$(grep -w web_hook_url /home/$USER/watchdog/config.js | sed -e 's/.*web_hook_url: .//' | sed -e 's/.\{2\}$//')
                 if [[ "$discord" != "" && "$discord" != "0" ]]; then
                         echo -e "${PIN}${CYAN} Discord alert = ${GREEN}Enabled${NC}"
-                        smart_install_conf "discord" "$discord"
+                        smart_install_conf "discord" "$discord" "$1"
                 else
                         echo -e "${PIN}${CYAN} Discord alert = ${RED}Disabled${NC}"
                 fi
@@ -545,7 +552,7 @@ function config_smart_create() {
                 if [[ "$ping" != "" && "$ping" != "0" ]]; then
                         if [[ "$discord" != "" && "$discord" != "0" ]]; then
                                 echo -e "${PIN}${CYAN} Discord nick ping = ${GREEN}Enabled${NC}"
-                                smart_install_conf "ping" "$ping"
+                                smart_install_conf "ping" "$ping" "$1"
                         else
                                 echo -e "${PIN}${CYAN} Discord nick ping = ${RED}Disabled${NC}"
                         fi
@@ -553,60 +560,302 @@ function config_smart_create() {
                 telegram_alert=$(grep -w telegram_alert /home/$USER/watchdog/config.js | sed -e 's/.*telegram_alert: .//' | sed -e 's/.\{2\}$//')
                 if [[ "$telegram_alert" != "" && "$telegram_alert" != "0" ]]; then
                         echo -e "${PIN}${CYAN} Telegram alert = ${GREEN}Enabled${NC}"
-                        smart_install_conf "telegram_alert" "$telegram_alert"
+                        smart_install_conf "telegram_alert" "$telegram_alert" "$1"
                 else
                         echo -e "${PIN}${CYAN} Telegram alert = ${RED}Disabled${NC}"
-                        smart_install_conf "telegram_alert" "0"
+                        smart_install_conf "telegram_alert" "0" "$1"
                 fi
 
                 telegram_bot_token=$(grep -w telegram_bot_token /home/$USER/watchdog/config.js | sed -e 's/.*telegram_bot_token: .//' | sed -e 's/.\{2\}$//')
                 if [[ "$telegram_alert" == "1" ]]; then
                         echo -e "${PIN}${CYAN} Telegram bot token = ${GREEN}$telegram_bot_token${NC}"
-                        smart_install_conf "telegram_bot_token" "$telegram_bot_token"
+                        smart_install_conf "telegram_bot_token" "$telegram_bot_token" "$1"
                 fi
 
                 telegram_chat_id=$(grep -w telegram_chat_id /home/$USER/watchdog/config.js | sed -e 's/.*telegram_chat_id: .//' | sed -e 's/.\{1\}$//')
                 if [[ "$telegram_alert" == "1" ]]; then
                         echo -e "${PIN}${CYAN} Telegram chat id = ${GREEN}$telegram_chat_id${NC}"
-                        smart_install_conf "telegram_chat_id" "$telegram_chat_id"
+                        smart_install_conf "telegram_chat_id" "$telegram_chat_id" "$1"
                 fi
 
                 zelflux_update=$(grep -w zelflux_update /home/$USER/watchdog/config.js | sed -e 's/.*zelflux_update: .//' | egrep -o '[0-9]')
                 if [[ "$zelflux_update" == "1" ]]; then
                         echo -e "${PIN}${CYAN} FluxOS auto update = ${GREEN}Enabled${NC}"
-                        smart_install_conf "zelflux_update" "1"
+                        smart_install_conf "zelflux_update" "1" "$1"
                 else
                        echo -e "${PIN}${CYAN} FluxOS auto update = ${GREEN}Disabled${NC}"
-                       smart_install_conf "zelflux_update" "0"
+                       smart_install_conf "zelflux_update" "0" "$1"
                 fi
 
                 zelcash_update=$(grep -w zelcash_update /home/$USER/watchdog/config.js | sed -e 's/.*zelcash_update: .//' | egrep -o '[0-9]')
                 if [[ "$zelcash_update" == "1" ]]; then
                         echo -e "${PIN}${CYAN} Daemon auto update = ${GREEN}Enabled${NC}"
-                        smart_install_conf "zelcash_update" "1"
+                        smart_install_conf "zelcash_update" "1" "$1"
                 else
                        echo -e "${PIN}${CYAN} Daemon auto update = ${GREEN}Disabled${NC}"
-                       smart_install_conf "zelcash_update" "0"
+                       smart_install_conf "zelcash_update" "0" "$1"
                 fi
 
                 zelbench_update=$(grep -w zelbench_update /home/$USER/watchdog/config.js | sed -e 's/.*zelbench_update: .//' | egrep -o '[0-9]')
                 if [[ "$zelbench_update" == "1" ]]; then
                         echo -e "${PIN}${CYAN} Benchmark auto update = ${GREEN}Enabled${NC}"
-                        smart_install_conf "zelbench_update" "1"
+                        smart_install_conf "zelbench_update" "1" "$1"
                 else
                        echo -e "${PIN}${CYAN} Benchmark auto update = ${GREEN}Disabled${NC}"
-                       smart_install_conf "zelbench_update" "0"
+                       smart_install_conf "zelbench_update" "0" "$1"
                 fi
 
                 action=$(grep -w action /home/$USER/watchdog/config.js | sed -e 's/.*action: .//' | egrep -o '[0-9]')
                 if [[ "$action" == "1" ]]; then
                         echo -e "${PIN}${CYAN} Fix action = ${GREEN}Enabled${NC}"
-                        smart_install_conf "action" "1"
+                        smart_install_conf "action" "1" "$1"
                 else
                        echo -e "${PIN}${CYAN} Fix action  = ${GREEN}Disabled${NC}"
-                       smart_install_conf "action" "0"
+                       smart_install_conf "action" "0" "$1"
                 fi
         fi
+
+	echo -e ""
+	if [[ "$1" != "import" ]]; then
+	  echo -e "${HOT}${CYAN} Config file created, path: ${GREEN}/home/$USER/install_conf.json${NC}"
+	  echo -e ""
+	fi
+}
+
+function manual_build(){
+	skip_zelcash_config='0'
+	skip_bootstrap='0'
+	if [[ -d /home/$USER/$CONFIG_DIR ]]; then
+		if whiptail --yesno "Would you like import old settings from daemon and Flux?" 8 65; then
+			import_settings='1'
+			skip_zelcash_config='1'
+			sleep 1
+		else
+			import_settings='0'
+			sleep 1
+		fi
+		if whiptail --yesno "Would you like use exist Flux chain?" 8 65; then
+			use_old_chain='1'
+			skip_bootstrap='1'
+			sleep 1
+		else
+			use_old_chain='0'
+			sleep 1
+		fi
+	fi
+
+	if [[ "$skip_zelcash_config" == "1" ]]; then
+		prvkey=""
+		outpoint=""
+		index=""
+		zelid=""
+		kda_address=""
+		node_label="0" 
+		fix_action="1"      
+		eps_limit="0"
+		discord="0"
+		ping="0"
+		telegram_alert="0"    
+		telegram_bot_token="0"	      	      
+		telegram_chat_id="0"	
+	else
+		prvkey=$(whiptail --inputbox "Enter your FluxNode Identity Key from Zelcore" 8 65 3>&1 1>&2 2>&3)
+		sleep 1
+		outpoint=$(whiptail --inputbox "Enter your FluxNode Collateral TX ID from Zelcore" 8 72 3>&1 1>&2 2>&3)
+		sleep 1
+		index=$(whiptail --inputbox "Enter your FluxNode Output Index from Zelcore" 8 65 3>&1 1>&2 2>&3)
+		sleep 1
+		while true
+		do
+			zel_id=$(whiptail --title "Flux Configuration" --inputbox "Enter your ZEL ID from ZelCore (Apps -> Zel ID (CLICK QR CODE)) " 8 72 3>&1 1>&2 2>&3)
+			if [ $(printf "%s" "$zel_id" | wc -c) -eq "34" ] || [ $(printf "%s" "$zel_id" | wc -c) -eq "33" ]; then
+				echo -e "${ARROW} ${CYAN}Zel ID is valid${CYAN}.........................[${CHECK_MARK}${CYAN}]${NC}"
+				break
+			else
+				echo -e "${ARROW} ${CYAN}Zel ID is not valid try again...........[${X_MARK}${CYAN}]${NC}"
+				sleep 4
+			fi
+		done
+		sleep 1
+		while true
+		do
+			KDA_A=$(whiptail --inputbox "Please enter your Kadena address from Zelcore" 8 85 3>&1 1>&2 2>&3)
+			KDA_A=$(grep -Eo "^k:[0-9a-z]{64}\b" <<< "$KDA_A")
+			if [[ "$KDA_A" != "" && "$KDA_A" != *kadena* && "$KDA_A" = *k:*  ]]; then    
+				echo -e "${ARROW} ${CYAN}Kadena address is valid.................[${CHECK_MARK}${CYAN}]${NC}"	
+				kda_address="kadena:$KDA_A?chainid=0"		    
+				sleep 2
+				break
+			else	     
+				echo -e "${ARROW} ${CYAN}Kadena address is not valid.............[${X_MARK}${CYAN}]${NC}"
+				sleep 2		     
+			fi
+		done
+		sleep 1
+		if whiptail --yesno "Would you like enable autoupdate?" 8 65; then
+			zelflux_update='1'
+			zelcash_update='1'
+			zelbench_update='1'
+		else
+			zelflux_update='0'
+			zelcash_update='0'
+			zelbench_update='0'   
+		fi
+		if whiptail --yesno "Would you like enable alert notification?" 8 65; then
+			whiptail --msgbox "Info: to select/deselect item use 'space' ...to switch to OK/Cancel use 'tab' " 10 60
+			sleep 1
+			CHOICES=$(whiptail --title "Choose options: " --separate-output --checklist "Choose options: " 10 45 5 \
+			"1" "Discord notification      " ON \
+			"2" "Telegram notification     " OFF 3>&1 1>&2 2>&3 )
+			if [[ -z "$CHOICES" ]]; then
+				echo -e "${ARROW} ${CYAN}No option was selected...Alert notification disabled! ${NC}"
+				sleep 1
+				discord="0"
+				ping="0"
+				telegram_alert="0"
+				telegram_bot_token="0"
+				telegram_chat_id="0"
+				node_label="0"
+			else
+				for CHOICE in $CHOICES; do
+				case "$CHOICE" in
+				"1")
+					discord=$(whiptail --inputbox "Enter your discord server webhook url" 8 65 3>&1 1>&2 2>&3)
+					sleep 1
+					if whiptail --yesno "Would you like enable nick ping on discord?" 8 60; then
+						while true
+						do
+							ping=$(whiptail --inputbox "Enter your discord user id" 8 60 3>&1 1>&2 2>&3)
+						if [[ $ping == ?(-)+([0-9]) ]]; then
+							string_limit_check_mark "UserID is valid..........................................."
+							break
+						else
+							string_limit_x_mark "UserID is not valid try again............................."
+							sleep 1
+						fi
+						done
+						sleep 1
+					else
+						ping="0"
+						sleep 1
+					fi
+				;;
+				"2")
+					telegram_alert="1"
+					while true
+					do
+						telegram_bot_token=$(whiptail --inputbox "Enter telegram bot token from BotFather" 8 65 3>&1 1>&2 2>&3)
+						if [[ $(grep ':' <<< "$telegram_bot_token") != "" ]]; then
+						string_limit_check_mark "Bot token is valid..........................................."
+						break
+						else
+							string_limit_x_mark "Bot token is not valid try again............................."
+							sleep 1
+						fi
+					done
+					sleep 1
+					while true
+					do
+						telegram_chat_id=$(whiptail --inputbox "Enter your chat id from GetIDs Bot" 8 60 3>&1 1>&2 2>&3)
+						if [[ $telegram_chat_id == ?(-)+([0-9]) ]]; then
+							string_limit_check_mark "Chat ID is valid..........................................."
+							break
+						else
+							string_limit_x_mark "Chat ID is not valid try again............................."
+							sleep 1
+						fi
+					done
+				 sleep 1
+				;;
+				esac
+				done
+			fi
+			while true
+			do
+			node_label=$(whiptail --inputbox "Enter name of your node (alias)" 8 65 3>&1 1>&2 2>&3)
+			if [[ "$node_label" != "" && "$node_label" != "0"  ]]; then
+				string_limit_check_mark "Node name is valid..........................................."
+				break
+			else
+				string_limit_x_mark "Node name is not valid try again............................."
+				sleep 1
+			fi
+			done
+		else
+			discord="0"
+			ping="0"
+			telegram_alert="0"
+			telegram_bot_token="0"
+			telegram_chat_id="0"
+			node_label="0"
+			sleep 1
+		fi
+
+		if [[ "$discord" == 0 ]]; then
+			ping="0"
+		fi
+
+		if [[ "$telegram_alert" == 0 || "$telegram_alert" == "" ]]; then
+			telegram_alert="0"
+			telegram_bot_token="0"
+			telegram_chat_id="0"
+		fi
+
+		index_from_file="$index"
+		tx_from_file="$outpoint"
+		stak_info=$(curl -sSL -m 5 https://$network_url_1/api/tx/$tx_from_file | jq -r ".vout[$index_from_file] | .value,.n,.scriptPubKey.addresses[0],.spentTxId" | paste - - - - | awk '{printf "%0.f %d %s %s\n",$1,$2,$3,$4}' | grep 'null' | egrep -o '1000|12500|40000')
+		if [[ "$stak_info" == "" ]]; then
+			stak_info=$(curl -sSL -m 5 https://$network_url_2/api/tx/$tx_from_file | jq -r ".vout[$index_from_file] | .value,.n,.scriptPubKey.addresses[0],.spentTxId" | paste - - - - | awk '{printf "%0.f %d %s %s\n",$1,$2,$3,$4}' | grep 'null' | egrep -o '1000|12500|40000')
+		fi	
+		if [[ $stak_info == ?(-)+([0-9]) ]]; then
+			case $stak_info in
+			"1000") eps_limit=90 ;;
+			"12500")  eps_limit=180 ;;
+			"40000") eps_limit=300 ;;
+			esac
+		else
+			eps_limit=0;
+		fi
+	fi
+	if [[ "$skip_bootstrap" == "0" ]]; then
+		if whiptail --yesno "Would you like use Flux bootstrap from script source?" 8 65; then
+			bootstrap_url=""
+			sleep 1
+		else
+			bootstrap_url=$(whiptail --inputbox "Enter your Flux bootstrap URL" 8 65 3>&1 1>&2 2>&3)
+			sleep 1
+		fi
+		if whiptail --yesno "Would you like keep bootstrap archive file localy?" 8 65; then
+			bootstrap_zip_del='0'
+			sleep 1
+		else
+			bootstrap_zip_del='1'
+			sleep 1
+		fi
+	fi
+	if whiptail --yesno "Would you like to enable UPnP for this node?" 8 65; then
+	  router_ip=$(ip rout | head -n1 | awk '{print $3}' 2>/dev/null)
+		gateway_ip=$(whiptail --inputbox "Enter your UPnP Gateway IP: (This is usually your router: $router_ip)" 8 85 3>&1 1>&2 2>&3)
+		upnp_port=$(whiptail --title "Enter your FluxOS UPnP Port" --radiolist \
+		"Use the UP/DOWN arrows to highlight the port you want. Press Spacebar on the port you want to select, THEN press ENTER." 17 50 8 \
+		"16127" "" ON \
+		"16137" "" OFF \
+		"16147" "" OFF \
+		"16157" "" OFF \
+		"16167" "" OFF \
+		"16177" "" OFF \
+		"16187" "" OFF \
+		"16197" "" OFF 3>&1 1>&2 2>&3)
+	else
+		gateway_ip=""
+		upnp_port=""
+	fi
+	firewall_disable='1'
+	swapon='1'
+	rm /home/$USER/install_conf.json > /dev/null 2>&1
+	install_conf_create
+	config_file
+	echo -e    
 }
 ###### HELPERS SECTION
 function  fluxos_clean(){
@@ -888,7 +1137,7 @@ function import_config_file() {
 			if [[ "$use_old_chain" == "1" ]]; then
 				echo -e "${PIN}${CYAN} Diuring re-installation old chain will be use....................[${CHECK_MARK}${CYAN}]${NC}" && sleep 1
 			else
-				if [[ "$bootstrap_url" == "0" || "$bootstrap_url" == "" ]]; then
+				if [[ "$bootstrap_url" == "0" || "$bootstrap_url" == "" || $bootstrap_url == "null" ]]; then
 					echo -e "${PIN}${CYAN} Use Flux daemon bootstrap from source build in script............[${CHECK_MARK}${CYAN}]${NC}" && sleep 1
 				else
 					echo -e "${PIN}${CYAN} Use Flux daemon bootstrap from own source........................[${CHECK_MARK}${CYAN}]${NC}" && sleep 1
@@ -900,8 +1149,10 @@ function import_config_file() {
 				fi
 			fi
 
-			if [[ ! -z "$gateway_ip" && ! -z "$upnp_port" ]]; then
-				echo -e "${PIN}${CYAN} Enable UPnP configuration........................................[${CHECK_MARK}${CYAN}]${NC}" 
+			if [[ ! -z "$gateway_ip" && ! -z "$upnp_port" ]]; then 
+			       if [[ "$upnp_port" != "null" ]]; then
+			         echo -e "${PIN}${CYAN} Enable UPnP configuration........................................[${CHECK_MARK}${CYAN}]${NC}" 
+			       fi
 			fi
 
 			if [[ "$discord" != "" && "$discord" != "0" ]] || [[ "$telegram_alert" == '1' ]]; then
@@ -1165,6 +1416,25 @@ function replace_zelid() {
 		fi
 	fi
 }
+
+function thunder_mode(){
+ if [[ -d $HOME/.fluxbenchmark ]]; then
+   sudo chown -R $USER:$USER $HOME/.fluxbenchmark > /dev/null 2>&1
+ fi
+ if [[ -f /home/$USER/.fluxbenchmark/fluxbench.conf ]]; then
+   if [[ $(grep -e "thunder" /home/$USER/.fluxbenchmark/fluxbench.conf) == "" ]]; then
+     config_builder "thunder" "1" "Thunder Mode" "benchmark"
+   else
+     sed -i "/$(grep -e "thunder" /home/$USER/.fluxbenchmark/fluxbench.conf)/d" /home/$USER/.fluxbenchmark/fluxbench.conf > /dev/null 2>&1
+     echo -e "${ARROW}${GREEN} [BenchD] ${CYAN}Thunder Mode disabled successful${NC}" "${CHECK_MARK}"
+   fi
+ else
+   config_builder "thunder" "1" "Thunder Mode" "benchmark"
+ fi
+ echo -e "${ARROW}${GREEN} [BenchD] ${CYAN}Restarting service... ${NC}"
+ sudo systemctl restart zelcash > /dev/null 2>&1
+}
+
 function fluxos_reconfiguration {
  echo -e "${GREEN}Module: FluxOS reconfiguration${NC}"
  echo -e "${YELLOW}================================================================${NC}"
@@ -1177,7 +1447,8 @@ function fluxos_reconfiguration {
  CHOICE=$(
  whiptail --title "FluxOS Configuration" --menu "Make your choice" 15 40 6 \
  "1)" "Replace ZELID"   \
- "2)" "Add/Replace kadena address"  3>&2 2>&1 1>&3
+ "2)" "Add/Replace kadena address" \
+ "3)" "Enable/Disable thunder mode"   3>&2 2>&1 1>&3
 	)
 		case $CHOICE in
 		"1)")
@@ -1186,6 +1457,10 @@ function fluxos_reconfiguration {
 		"2)")
 		replace_kadena
 		;;
+		"3)")
+		thunder_mode
+		;;
+		
 	esac
 }
 ######### BOOTSTRAP SECTION ############################
@@ -1314,7 +1589,7 @@ function bootstrap_new() {
 		fi
 	fi
 
-	if [[  "$bootstrap_url" == "0"  || "$bootstrap_url" == "" ]]; then
+	if [[  "$bootstrap_url" == "0"  || "$bootstrap_url" == "" || "$bootstrap_url" == "null" ]]; then
 		cdn_speedtest "0" "6"
 		if [[ "$server_offline" == "1" ]]; then
 			echo -e "${WORNING} ${CYAN}All Bootstrap server offline, operation aborted.. ${NC}" && sleep 1
@@ -1858,23 +2133,23 @@ function upnp_enable() {
 			fi
 		fi
 	done
-	if [[ $(cat /home/$USER/zelflux/config/userconfig.js | grep "apiport") != "" ]]; then
-		sed -i "s/$(grep -e apiport /home/$USER/zelflux/config/userconfig.js)/apiport: '$FLUX_PORT',/" /home/$USER/zelflux/config/userconfig.js
-		if [[ $(grep -w $FLUX_PORT /home/$USER/zelflux/config/userconfig.js) != "" ]]; then
-			echo -e "${ARROW} ${CYAN}FluxOS port replaced successfully...................[${CHECK_MARK}${CYAN}]${NC}"
-		fi
-	else
-		insertAfter "/home/$USER/zelflux/config/userconfig.js" "zelid" "apiport: '$FLUX_PORT',"
-		echo -e "${ARROW} ${CYAN}FluxOS port set successfully........................[${CHECK_MARK}${CYAN}]${NC}"
-	fi
+	#if [[ $(cat /home/$USER/zelflux/config/userconfig.js | grep "apiport") != "" ]]; then
+		#sed -i "s/$(grep -e apiport /home/$USER/zelflux/config/userconfig.js)/apiport: '$FLUX_PORT',/" /home/$USER/zelflux/config/userconfig.js
+		#if [[ $(grep -w $FLUX_PORT /home/$USER/zelflux/config/userconfig.js) != "" ]]; then
+			#echo -e "${ARROW} ${CYAN}FluxOS port replaced successfully...................[${CHECK_MARK}${CYAN}]${NC}"
+		#fi
+	#else
+		#insertAfter "/home/$USER/zelflux/config/userconfig.js" "zelid" "apiport: '$FLUX_PORT',"
+		#echo -e "${ARROW} ${CYAN}FluxOS port set successfully........................[${CHECK_MARK}${CYAN}]${NC}"
+	#fi
+	config_builder "apiport" "$FLUX_PORT" "MultiPort Mode" "fluxos"
 	if [[ ! -d /home/$USER/.fluxbenchmark ]]; then
 		sudo mkdir -p /home/$USER/.fluxbenchmark 2>/dev/null
-		echo "fluxport=$FLUX_PORT" | sudo tee "/home/$USER/.fluxbenchmark/fluxbench.conf" > /dev/null
+		config_builder "fluxport" "$FLUX_PORT" "MultiPort Mode" "benchmark"
 	else
-		echo "fluxport=$FLUX_PORT" | sudo tee "/home/$USER/.fluxbenchmark/fluxbench.conf" > /dev/null
+		config_builder "fluxport" "$FLUX_PORT" "MultiPort Mode" "benchmark"
 	fi
 	if [[ -f /home/$USER/.fluxbenchmark/fluxbench.conf ]]; then
-		echo -e "${ARROW} ${CYAN}Fluxbench port set successfully.....................[${CHECK_MARK}${CYAN}]${NC}"
 		echo -e "${ARROW} ${CYAN}Restarting FluxOS and Benchmark.....${NC}"
 		#API PORT
 		sudo ufw allow $FLUX_PORT > /dev/null 2>&1
@@ -2071,7 +2346,7 @@ function selfhosting() {
 
 	if [[ "$device_name" != "" && "$WANIP" != "" ]]; then
 	  echo -e "${ARROW} ${CYAN}Detected IP: ${GREEN}$WANIP ${NC}"
-		sudo ip addr add $WANIP dev $device_name
+		sudo ip addr add $WANIP dev $device_name > /dev/null 2>&1
 	else
 		echo -e "${WORNING} ${CYAN}Problem detected operation aborted! ${NC}" && sleep 1
 		echo -e ""
@@ -2131,16 +2406,17 @@ function selfhosting() {
 	fi
 	EOF
 	sudo chmod +x /home/$USER/ip_check.sh
-	echo -e "${ARROW} ${CYAN}Adding cron jobs...${NC}" && sleep 1
 	sudo [ -f /var/spool/cron/crontabs/$USER ] && crontab_check=$(sudo cat /var/spool/cron/crontabs/$USER | grep -o ip_check | wc -l) || crontab_check=0
-	if [[ "$crontab_check" == "0" ]]; then
-		(crontab -l -u "$USER" 2>/dev/null; echo "@reboot env USER=\$LOGNAME \$HOME/ip_check.sh restart") | crontab -
-		(crontab -l -u "$USER" 2>/dev/null; echo "*/15 * * * * env USER=\$LOGNAME \$HOME/ip_check.sh ip_check") | crontab -
-		echo -e "${ARROW} ${CYAN}Script installed! ${NC}" 
-	else 
-		echo -e "${ARROW} ${CYAN}Cron jobs already exists, skipped... ${NC}"
-		echo -e "${ARROW} ${CYAN}Script installed! ${NC}" 
+	
+	if [[ "$crontab_check" != "0" ]]; then
+	  echo -e "${ARROW} ${CYAN}Removing old cron jobs...${NC}"
+	  crontab -u $USER -l | grep -v 'ip_check'  | crontab -u $USER -
 	fi
+	
+	echo -e "${ARROW} ${CYAN}Adding cron jobs...${NC}" && sleep 1
+	(crontab -l -u "$USER" 2>/dev/null; echo "@reboot env USER=\$LOGNAME \$HOME/ip_check.sh restart") | crontab -
+	(crontab -l -u "$USER" 2>/dev/null; echo "*/15 * * * * env USER=\$LOGNAME \$HOME/ip_check.sh ip_check") | crontab -
+	echo -e "${ARROW} ${CYAN}Script installed! ${NC}" 
 	echo -e "" 
 }
 function multinode(){
