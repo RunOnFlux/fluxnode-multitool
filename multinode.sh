@@ -7,15 +7,23 @@ function upnp_disable() {
 		echo -e ""
 		exit
  fi
+ 
  if [[ -f /home/$USER/.fluxbenchmark/fluxbench.conf ]]; then
- echo -e ""
- echo -e "${ARROW} ${YELLOW}Removing FluxOS UPnP configuration.....${NC}"
- sudo rm -rf /home/$USER/.fluxbenchmark/fluxbench.conf
- else
+   if [[ $(grep -e "fluxport" /home/$USER/.fluxbenchmark/fluxbench.conf) != "" ]]; then
+     echo -e ""
+     echo -e "${ARROW} ${YELLOW}Removing FluxOS UPnP configuration.....${NC}"
+     sed -i "/$(grep -e "fluxport" /home/$USER/.fluxbenchmark/fluxbench.conf)/d" /home/$USER/.fluxbenchmark/fluxbench.conf > /dev/null 2>&1
+   else
 	 echo -e "${ARROW} ${CYAN}UPnP Mode is already disabled...${NC}"
 	 echo -e ""
 	 exit
+   fi
+ else
+   echo -e "${ARROW} ${CYAN}UPnP Mode is already disabled...${NC}"
+   echo -e ""
+   exit
  fi
+ 
  if [[ $(cat /home/$USER/zelflux/config/userconfig.js | grep 'apiport' | wc -l) == "1" ]]; then
 	cat /home/$USER/zelflux/config/userconfig.js | sed '/apiport/d' | sudo tee "/home/$USER/zelflux/config/userconfig.js" > /dev/null
  fi

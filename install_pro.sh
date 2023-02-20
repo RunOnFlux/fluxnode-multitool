@@ -42,173 +42,22 @@ function config_veryfity(){
   fi
 }
 function import_date() {
-	if [[ -f /home/$USER/$CONFIG_DIR/$CONFIG_FILE || -f /home/$USER/.zelcash/zelcash.conf ]]; then
+	if [[ -f /home/$USER/$CONFIG_DIR/$CONFIG_FILE ]]; then
 		if [[ -z "$import_settings" ]]; then
 			if whiptail --yesno "Would you like to import data from Flux config files Y/N?" 8 60; then
-				OLD_CONFIG=0
-				if [[ -d /home/$USER/.zelcash ]]; then
-					CONFIG_DIR='.zelcash'
-					CONFIG_FILE='zelcash.conf' 
-					OLD_CONFIG=1
-				fi
-				IMPORT_ZELCONF="1"
-				echo
-				echo -e "${ARROW} ${YELLOW}Imported settings:${NC}"
-				zelnodeprivkey=$(grep -w zelnodeprivkey /home/$USER/$CONFIG_DIR/$CONFIG_FILE | sed -e 's/zelnodeprivkey=//' | sed 's/ //g') 
-				echo -e "${PIN}${CYAN} Identity Key = ${GREEN}$zelnodeprivkey${NC}"
-				zelnodeoutpoint=$(grep -w zelnodeoutpoint /home/$USER/$CONFIG_DIR/$CONFIG_FILE | sed -e 's/zelnodeoutpoint=//' | sed 's/ //g') 
-				echo -e "${PIN}${CYAN} Collateral TX ID = ${GREEN}$zelnodeoutpoint${NC}"
-				zelnodeindex=$(grep -w zelnodeindex /home/$USER/$CONFIG_DIR/$CONFIG_FILE | sed -e 's/zelnodeindex=//' | sed 's/ //g')
-				echo -e "${PIN}${CYAN} Output Index = ${GREEN}$zelnodeindex${NC}"
-				if [[ "$OLD_CONFIG" == "1" ]]; then 
-					CONFIG_DIR='.flux'
-					CONFIG_FILE='flux.conf' 
-				fi
-				if [[ -f ~/$FLUX_DIR/config/userconfig.js ]]; then
-					ZELID=$(grep -w zelid /home/$USER/$FLUX_DIR/config/userconfig.js | sed -e 's/.*zelid: .//' | sed -e 's/.\{2\}$//') 
-					if [[ "$ZELID" != "" ]]; then
-						echo -e "${PIN}${CYAN} Zel ID = ${GREEN}$ZELID${NC}"
-						IMPORT_ZELID="1"
-					fi
-					KDA_A=$(grep -w kadena /home/$USER/$FLUX_DIR/config/userconfig.js | sed -e 's/.*kadena: .//' | sed -e 's/.\{2\}$//')
-					if [[ "$KDA_A" != "" ]]; then
-						echo -e "${PIN}${CYAN} KDA address = ${GREEN}$KDA_A${NC}"
-					fi
-					upnp_port=$(grep -w apiport /home/$USER/$FLUX_DIR/config/userconfig.js | sed -e 's/.*apiport: .//' | sed -e 's/.\{2\}$//')
-					if [[ "$upnp_port" != "" ]]; then
-						gateway_ip=$(ip rout | head -n1 | awk '{print $3}' 2>/dev/null)
-						echo -e "${PIN}${CYAN} UPnP port = ${GREEN}$upnp_port${NC}"
-						echo -e "${PIN}${CYAN} Gateway IP = ${GREEN}$gateway_ip${NC}"
-					fi
-				fi
-				if [[ -f /home/$USER/watchdog/config.js ]]; then
-					echo -e ""
-					echo -e "${ARROW} ${YELLOW}Imported watchdog settings:${NC}"
-		
-					node_label=$(grep -w label /home/$USER/watchdog/config.js | sed -e 's/.*label: .//' | sed -e 's/.\{2\}$//')
-					if [[ "$node_label" != "" && "$node_label" != "0" ]]; then
-						echo -e "${PIN}${CYAN} Label = ${GREEN}Enabled${NC}"
-					else
-						echo -e "${PIN}${CYAN} Label = ${RED}Disabled${NC}"
-					fi
-		
-					eps_limit=$(grep -w tier_eps_min /home/$USER/watchdog/config.js | sed -e 's/.*tier_eps_min: .//' | sed -e 's/.\{2\}$//')
-					if [[ "$eps_limit" != "" && "$eps_limit" != "0" ]]; then
-						echo -e "${PIN}${CYAN} Tier_eps_min = ${GREEN}$eps_limit${NC}"   
-					fi
-		
-					discord=$(grep -w web_hook_url /home/$USER/watchdog/config.js | sed -e 's/.*web_hook_url: .//' | sed -e 's/.\{2\}$//')	      
-					if [[ "$discord" != "" && "$discord" != "0" ]]; then
-						echo -e "${PIN}${CYAN} Discord alert = ${GREEN}Enabled${NC}"
-					else
-						echo -e "${PIN}${CYAN} Discord alert = ${RED}Disabled${NC}"
-					fi
-					ping=$(grep -w ping /home/$USER/watchdog/config.js | sed -e 's/.*ping: .//' | sed -e 's/.\{2\}$//')    
-					if [[ "$ping" != "" && "$ping" != "0" ]]; then	      
-						if [[ "$discord" != "" && "$discord" != "0" ]]; then
-							echo -e "${PIN}${CYAN} Discord ping = ${GREEN}Enabled${NC}"
-						else
-							echo -e "${PIN}${CYAN} Discord ping = ${RED}Disabled${NC}"
-						fi      
-					fi
-					telegram_alert=$(grep -w telegram_alert /home/$USER/watchdog/config.js | sed -e 's/.*telegram_alert: .//' | sed -e 's/.\{2\}$//')
-					if [[ "$telegram_alert" != "" && "$telegram_alert" != "0" ]]; then
-						echo -e "${PIN}${CYAN} Telegram alert = ${GREEN}Enabled${NC}"
-					else
-						echo -e "${PIN}${CYAN} Telegram alert = ${RED}Disabled${NC}"
-					fi
-		
-					telegram_bot_token=$(grep -w telegram_bot_token /home/$USER/watchdog/config.js | sed -e 's/.*telegram_bot_token: .//' | sed -e 's/.\{2\}$//')
-					if [[ "$telegram_alert" == "1" ]]; then
-						echo -e "${PIN}${CYAN} Telegram bot token = ${GREEN}$telegram_alert${NC}"	
-					fi
-		
-					telegram_chat_id=$(grep -w telegram_chat_id /home/$USER/watchdog/config.js | sed -e 's/.*telegram_chat_id: .//' | sed -e 's/.\{1\}$//')
-					if [[ "$telegram_alert" == "1" ]]; then
-						echo -e "${PIN}${CYAN} Telegram chat id = ${GREEN}$telegram_chat_id${NC}"	
-					fi
-				fi 
+		          config_smart_create "import"
+			  IMPORT_ZELCONF="1"
+		          if [[ "$ZELID" != "" ]]; then
+		            IMPORT_ZELID="1"
+			  fi 		
 			fi   
 		else 
-			if [[ "$import_settings" == "1" ]]; then
-				OLD_CONFIG=0
-				if [[ -d /home/$USER/.zelcash ]]; then
-					CONFIG_DIR='.zelcash'
-					CONFIG_FILE='zelcash.conf' 
-					OLD_CONFIG=1
-				fi      
-				IMPORT_ZELCONF="1"
-				echo -e ""
-				echo -e "${ARROW} ${YELLOW}Imported settings:${NC}"
-				zelnodeprivkey=$(grep -w zelnodeprivkey /home/$USER/$CONFIG_DIR/$CONFIG_FILE | sed -e 's/zelnodeprivkey=//' | sed 's/ //g') 
-				echo -e "${PIN}${CYAN} Identity Key = ${GREEN}$zelnodeprivkey${NC}"
-				zelnodeoutpoint=$(grep -w zelnodeoutpoint /home/$USER/$CONFIG_DIR/$CONFIG_FILE | sed -e 's/zelnodeoutpoint=//' | sed 's/ //g') 
-				echo -e "${PIN}${CYAN} Collateral TX ID = ${GREEN}$zelnodeoutpoint${NC}"
-				zelnodeindex=$(grep -w zelnodeindex /home/$USER/$CONFIG_DIR/$CONFIG_FILE | sed -e 's/zelnodeindex=//' | sed 's/ //g')
-				echo -e "${PIN}${CYAN} Output Index = ${GREEN}$zelnodeindex${NC}"       
-				if [[ "$OLD_CONFIG" == "1" ]]; then 
-					CONFIG_DIR='.flux'
-					CONFIG_FILE='flux.conf' 
-				fi
-				if [[ -f ~/$FLUX_DIR/config/userconfig.js ]]; then
-					ZELID=$(grep -w zelid /home/$USER/$FLUX_DIR/config/userconfig.js | sed -e 's/.*zelid: .//' | sed -e 's/.\{2\}$//')
-					if [[ "$ZELID" != "" ]]; then
-						echo -e "${PIN}${CYAN} Zel ID = ${GREEN}$ZELID${NC}"
-						IMPORT_ZELID="1"
-					fi  
-					KDA_A=$(grep -w kadena /home/$USER/$FLUX_DIR/config/userconfig.js | sed -e 's/.*kadena: .//' | sed -e 's/.\{2\}$//')
-					if [[ "$KDA_A" != "" ]]; then
-						echo -e "${PIN}${CYAN} KDA address = ${GREEN}$KDA_A${NC}"
-					fi   
-					upnp_port=$(grep -w apiport /home/$USER/$FLUX_DIR/config/userconfig.js | sed -e 's/.*apiport: .//' | sed -e 's/.\{2\}$//')
-					if [[ "$upnp_port" != "" ]]; then
-						gateway_ip=$(ip rout | head -n1 | awk '{print $3}' 2>/dev/null)
-						echo -e "${PIN}${CYAN} UPnP port = ${GREEN}$upnp_port${NC}"
-						echo -e "${PIN}${CYAN} Gateway IP = ${GREEN}$gateway_ip${NC}"
-					fi            
-				fi
-				if [[ -f /home/$USER/watchdog/config.js ]]; then
-					echo -e ""
-					echo -e "${ARROW} ${YELLOW}Imported watchdog settings:${NC}"  
-					node_label=$(grep -w label /home/$USER/watchdog/config.js | sed -e 's/.*label: .//' | sed -e 's/.\{2\}$//')
-					if [[ "$node_label" != "" && "$node_label" != "0" ]]; then
-						echo -e "${PIN}${CYAN} Label = ${GREEN}Enabled${NC}"
-					else
-						echo -e "${PIN}${CYAN} Label = ${RED}Disabled${NC}"
-					fi
-					eps_limit=$(grep -w tier_eps_min /home/$USER/watchdog/config.js | sed -e 's/.*tier_eps_min: .//' | sed -e 's/.\{2\}$//')
-					if [[ "$eps_limit" != "" && "$eps_limit" != "0" ]]; then
-						echo -e "${PIN}${CYAN} Tier_eps_min = ${GREEN}$eps_limit${NC}" 
-					fi
-					discord=$(grep -w web_hook_url /home/$USER/watchdog/config.js | sed -e 's/.*web_hook_url: .//' | sed -e 's/.\{2\}$//')	      
-					if [[ "$discord" != "" && "$discord" != "0" ]]; then
-						echo -e "${PIN}${CYAN} Discord alert = ${GREEN}Enabled${NC}"
-						else
-						echo -e "${PIN}${CYAN} Discord alert = ${RED}Disabled${NC}"
-					fi
-					ping=$(grep -w ping /home/$USER/watchdog/config.js | sed -e 's/.*ping: .//' | sed -e 's/.\{2\}$//')    
-					if [[ "$ping" != "" && "$ping" != "0" ]]; then
-						if [[ "$discord" != "" && "$discord" != "0" ]]; then
-							echo -e "${PIN}${CYAN} Discord ping = ${GREEN}Enabled${NC}"
-						else
-							echo -e "${PIN}${CYAN} Discord ping = ${RED}Disabled${NC}"
-						fi
-					fi
-					telegram_alert=$(grep -w telegram_alert /home/$USER/watchdog/config.js | sed -e 's/.*telegram_alert: .//' | sed -e 's/.\{2\}$//')
-					if [[ "$telegram_alert" != "" && "$telegram_alert" != "0" ]]; then
-						echo -e "${PIN}${CYAN} Telegram alert = ${GREEN}Enabled${NC}"
-					else
-						echo -e "${PIN}${CYAN} Telegram alert = ${RED}Disabled${NC}"
-					fi
-					telegram_bot_token=$(grep -w telegram_bot_token /home/$USER/watchdog/config.js | sed -e 's/.*telegram_bot_token: .//' | sed -e 's/.\{2\}$//')
-					if [[ "$telegram_alert" == "1" ]]; then
-						echo -e "${PIN}${CYAN} Telegram bot token = ${GREEN}$telegram_alert${NC}"	
-					fi
-					telegram_chat_id=$(grep -w telegram_chat_id /home/$USER/watchdog/config.js | sed -e 's/.*telegram_chat_id: .//' | sed -e 's/.\{1\}$//')
-					if [[ "$telegram_alert" == "1" ]]; then
-						echo -e "${PIN}${CYAN} Telegram chat id = ${GREEN}$telegram_chat_id${NC}" 	
-					fi	  
-				fi    
+			if [[ "$import_settings" == "1" ]]; then	  
+		          config_smart_create "import"
+			  IMPORT_ZELCONF="1"
+		          if [[ "$ZELID" != "" ]]; then
+		            IMPORT_ZELID="1"
+			  fi     
 			fi
 		fi
 	fi
@@ -821,6 +670,12 @@ log_rotate "Docker" "docker_debug_log" "/var/lib/docker/containers/*/*.log" "dai
 basic_security
 status_loop
 install_watchdog
+if [[ "$thunder" == "1" ]]; then
+        echo -e ""
+	echo -e "${ARROW} ${YELLOW}Thunder Mode configuration...${NC}"
+	thunder_mode "install"
+fi
+finalizing
 if [[ "$gateway_ip" != "" && "$upnp_port" != "" ]] && [[ "$upnp_port" != "null" ]] ; then
 	upnp_enable "install"
 fi
