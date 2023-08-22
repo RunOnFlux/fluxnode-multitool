@@ -2596,6 +2596,14 @@ function selfhosting() {
 	cat <<-'EOF' > /home/$USER/ip_check.sh
 	#!/bin/bash
 
+  function clean_ip(){
+    ip_list=($(ip addr | grep "scope global $device_name" | awk '{print $2}'))
+    ip_list_count=${#ip_list[@]}
+    for (( i=0;i<$ip_list_count;i++)); do
+      sudo ip addr del ${ip_list[${i}]} dev ${device_name}
+    done
+  }
+  
 	function get_ip(){
 	WANIP=$(curl --silent -m 10 https://api4.my-ip.io/ip | tr -dc '[:alnum:].')
 	if [[ "$WANIP" == "" || "$WANIP" = *html* ]]; then
@@ -2637,6 +2645,7 @@ function selfhosting() {
 		 if [[ "$WANIP" != "$confirmed_ip" ]]; then
 			date_timestamp=$(date '+%Y-%m-%d %H:%M:%S')
 			echo -e "New IP detected during $1, IP: $WANIP was added to $device_name at $date_timestamp" >> /home/$USER/ip_history.log
+      clean_ip
 			sudo ip addr add $WANIP dev $device_name && sleep 2
 		 fi
 	  fi
