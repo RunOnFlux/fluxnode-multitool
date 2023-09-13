@@ -79,13 +79,13 @@ sleep 1
 fi
 
 if [[ "$firewall_disable" == "1" ]]; then
-echo -e "${PIN}${CYAN}Firewall disabled diuring installation...........................[${CHECK_MARK}${CYAN}]${NC}" && sleep 1
+echo -e "${PIN}${CYAN}Firewall disabled during installation...........................[${CHECK_MARK}${CYAN}]${NC}" && sleep 1
 else
-echo -e "${PIN}${CYAN}Firewall enabled diuring installation............................[${CHECK_MARK}${CYAN}]${NC}" && sleep 1
+echo -e "${PIN}${CYAN}Firewall enabled during installation............................[${CHECK_MARK}${CYAN}]${NC}" && sleep 1
 fi
 
 if [[ "$use_old_chain" == "1" ]]; then
-echo -e "${PIN}${CYAN}Diuring re-installation old chain will be use....................[${CHECK_MARK}${CYAN}]${NC}" && sleep 1
+echo -e "${PIN}${CYAN}During re-installation old chain will be use....................[${CHECK_MARK}${CYAN}]${NC}" && sleep 1
 
 else
 
@@ -425,7 +425,7 @@ exit
 fi
 
 
-if whiptail --yesno "Would you like disable firewall diuring installation?" 8 65; then
+if whiptail --yesno "Would you like disable firewall during installation?" 8 65; then
 firewall_disable='1'
 sleep 1
 else
