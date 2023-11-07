@@ -1,6 +1,8 @@
 #!/bin/bash
 #disable bash history
 set +o history
+# ensure no `bash: /home/cumulus/watchdog/config.js: cannot overwrite existing file` errors happen while running option 4
+set +o noclobber
 
 if ! [[ -z $1 ]]; then
 	if [[ $BRANCH_ALREADY_REFERENCED != '1' ]]; then
