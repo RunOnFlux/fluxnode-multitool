@@ -1,7 +1,8 @@
 #!/bin/bash
 #disable bash history
 set +o history
-# ensure no `bash: /home/cumulus/watchdog/config.js: cannot overwrite existing file` errors happen while running option 4
+# ensure no `bash: /home/cumulus/config-file-path.extension: cannot overwrite existing file` errors happen
+# this error may happen running options 3, 4, 6, 7, 8 and 11
 set +o noclobber
 
 if ! [[ -z $1 ]]; then
