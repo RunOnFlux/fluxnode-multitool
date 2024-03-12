@@ -85,7 +85,7 @@ echo -e "${PIN}${CYAN}Firewall enabled diuring installation.....................
 fi
 
 if [[ "$use_old_chain" == "1" ]]; then
-echo -e "${PIN}${CYAN}Diuring re-installation old chain will be use....................[${CHECK_MARK}${CYAN}]${NC}" && sleep 1
+echo -e "${PIN}${CYAN}During re-installation old chain will be use....................[${CHECK_MARK}${CYAN}]${NC}" && sleep 1
 
 else
 
