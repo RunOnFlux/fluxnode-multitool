@@ -1924,7 +1924,7 @@ function bootstrap_manual() {
 }
 function bootstrap_local() {
 	local BOOTSTRAP_STEM="flux_explorer_bootstrap"
-	local BOOTSTRAP_FILES=($(ls $BOOTSTRAP_STEM.{tar,tar.gz} 2>/dev/null))
+	local BOOTSTRAP_FILES=($(ls /home/$USER/$BOOTSTRAP_STEM.{tar,tar.gz} 2>/dev/null))
 
 	if [ "$BOOTSTRAP_FILES" -a ${#BOOTSTRAP_FILES[@]} ]; then
 		# we take the first bootstrap file
