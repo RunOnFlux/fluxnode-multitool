@@ -1708,12 +1708,18 @@ function fluxos_reconfiguration {
 }
 ######### BOOTSTRAP SECTION ############################
 function tar_file_unpack() {
-	echo -e "${ARROW} ${CYAN}Unpacking wallet bootstrap please be patient...${NC}"
-	pv $1 | tar -zx -C $2
+	local TARFILE=$1
+	local DEST_DIR=$2
+	local MIME_TYPE=$(file -b --mime-type $TARFILE)
+	local GZIP=""
+	# tar is application/x-tar
+	[[ "$MIME_TYPE" == "application/gzip" ]] && GZIP="-z"
+	echo -e "${ARROW} ${CYAN}Unpacking daemon bootstrap please be patient...${NC}"
+	pv $TARFILE | tar $GZIP -x -C $DEST_DIR
 }
 function check_tar() {
 	echo -e "${ARROW} ${CYAN}Checking file integrity...${NC}"
-	if gzip -t "$1" &>/dev/null; then
+	if tar -tf "$1" &>/dev/null; then
 		echo -e "${ARROW} ${CYAN}Bootstrap file is valid.................[${CHECK_MARK}${CYAN}]${NC}"
 	else
 		echo -e "${ARROW} ${CYAN}Bootstrap file is corrupted.............[${X_MARK}${CYAN}]${NC}"
@@ -1917,9 +1923,12 @@ function bootstrap_manual() {
 	esac
 }
 function bootstrap_local() {
-	BOOTSTRAP_FILE="flux_explorer_bootstrap.tar.gz"
-	FILE_PATH="/home/$USER/$BOOTSTRAP_FILE"
-	if [ -f "$FILE_PATH" ]; then
+	local BOOTSTRAP_STEM="flux_explorer_bootstrap"
+	local BOOTSTRAP_FILES=($(ls /home/$USER/$BOOTSTRAP_STEM.{tar,tar.gz} 2>/dev/null))
+
+	if [ "$BOOTSTRAP_FILES" -a ${#BOOTSTRAP_FILES[@]} ]; then
+		# we take the first bootstrap file
+		FILE_PATH="/home/$USER/$BOOTSTRAP_FILES"
 		echo -e "${ARROW} ${CYAN}Local bootstrap file detected...${NC}"
 		check_tar "$FILE_PATH"
 		if [ -f "$FILE_PATH" ]; then
