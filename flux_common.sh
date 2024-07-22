@@ -132,6 +132,11 @@ function flux_daemon_conf_create() {
     externalip=$WANIP
     bind=0.0.0.0
     maxconnections=256
+    zmqpubhashtx=tcp://127.0.0.1:16123
+    zmqpubhashblock=tcp://127.0.0.1:16123
+    zmqpubrawblock=tcp://127.0.0.1:16123
+    zmqpubrawtx=tcp://127.0.0.1:16123
+    zmqpubsequence=tcp://127.0.0.1:16123
     # Addnode list
 EOF
     IFS=$'\n'
