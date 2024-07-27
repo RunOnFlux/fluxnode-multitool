@@ -1933,7 +1933,7 @@ function bootstrap_local() {
 
 	if [ "$BOOTSTRAP_FILES" -a ${#BOOTSTRAP_FILES[@]} ]; then
 		# we take the first bootstrap file
-		FILE_PATH="/home/$USER/$BOOTSTRAP_FILES"
+		FILE_PATH="$BOOTSTRAP_FILES"
 		echo -e "${ARROW} ${CYAN}Local bootstrap file detected...${NC}"
 		check_tar "$FILE_PATH"
 		if [ -f "$FILE_PATH" ]; then
