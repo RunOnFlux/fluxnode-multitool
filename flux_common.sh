@@ -1647,13 +1647,13 @@ function development_mode(){
     echo -e "${ARROW}${GREEN} [FluxOS] ${CYAN}Enabling development mode... ${NC}"
     config_builder "development" "true" "Development Mode" "fluxos"
     cd $HOME/$FLUX_DIR
-    git checkout development > /dev/null 2>&1
+    git checkout development && git pull > /dev/null 2>&1
     pm2 restart flux > /dev/null 2>&1
   else
     echo -e "${ARROW}${GREEN} [FluxOS] ${CYAN}Disabling development mode... ${NC}"
     config_builder "development" "false" "Development Mode" "fluxos"
     cd $HOME/$FLUX_DIR
-    git checkout master > /dev/null 2>&1
+    git checkout master && git pull > /dev/null 2>&1
     pm2 restart flux > /dev/null 2>&1
   fi
 }
