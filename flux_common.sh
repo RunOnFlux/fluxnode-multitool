@@ -1836,7 +1836,7 @@ function bootstrap_new() {
 			if [[ "$Mode" != "install" && "$server_offline" == "0" ]]; then
 				start_service
 				if whiptail --yesno "Would you like remove bootstrap archive file?" 8 60; then
-				  sudo rm -rf /home/$USER/$BOOTSTRAP_FILE /dev/null 2>&1 && sleep 2
+				  sudo rm -rf /home/$USER/$BOOTSTRAP_FILE > /dev/null 2>&1 && sleep 2
 				fi
 			fi
 			return
