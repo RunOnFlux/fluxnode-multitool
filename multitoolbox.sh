@@ -119,6 +119,11 @@ function install_flux() {
 		pm2 del flux > /dev/null 2>&1
 		pm2 save > /dev/null 2>&1
 	fi
+
+  echo -e "${ARROW} ${CYAN}Removing syncthing...${NC}"
+  sudo pkill -9 syncthing > /dev/null 2>&1
+  sudo apt-get remove --purge syncthing > /dev/null 2>&1
+  sudo apt-get autoremove > /dev/null 2>&1
  
 	docker_check=$(docker container ls -a | egrep 'zelcash|flux' | grep -Eo "^[0-9a-z]{8,}\b" | wc -l)
 	resource_check=$(df | egrep 'flux' | awk '{ print $1}' | wc -l)
