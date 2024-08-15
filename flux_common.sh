@@ -1088,17 +1088,23 @@ function os_check(){
 }
 
 function  fluxos_clean(){
-   docker_check=$(docker container ls -a | egrep 'zelcash|flux' | grep -Eo "^[0-9a-z]{8,}\b" | wc -l)
-   resource_check=$(df | egrep 'flux' | awk '{ print $1}' | wc -l)
-   if [[ $docker_check != 0 ]]; then
-     echo -e "${ARROW} ${CYAN}Removing containers...${NC}"
-     sudo service docker restart > /dev/null 2>&1 && sleep 2
-     docker container ls -a | egrep 'zelcash|flux' | grep -Eo "^[0-9a-z]{8,}\b" |
-     while read line; do
-       sudo docker stop $line > /dev/null 2>&1 && sleep 2
-       sudo docker rm $line > /dev/null 2>&1 && sleep 2
-     done
-   fi
+ docker_check=$(docker container ls -a | egrep 'zelcash|flux' | grep -Eo "^[0-9a-z]{8,}\b" | wc -l)
+ resource_check=$(df | egrep 'flux' | awk '{ print $1}' | wc -l)
+ if [[ $docker_check != 0 ]]; then
+   echo -e "${ARROW} ${CYAN}Removing containers...${NC}"
+   sudo service docker restart > /dev/null 2>&1 && sleep 2
+   docker container ls -a | egrep 'zelcash|flux' | grep -Eo "^[0-9a-z]{8,}\b" |
+   while read line; do
+     sudo docker stop $line > /dev/null 2>&1 && sleep 2
+     sudo docker rm $line > /dev/null 2>&1 && sleep 2
+   done
+ fi
+
+  echo -e "${ARROW} ${CYAN}Removing syncthing...${NC}"
+  sudo pkill -9 syncthing > /dev/null 2>&1
+  sudo apt-get remove --purge syncthing > /dev/null 2>&1
+  sudo apt-get autoremove > /dev/null 2>&1
+   
    if [[ $resource_check != 0 ]]; then
      echo -e "${ARROW} ${CYAN}Unmounting locked FluxOS resource${NC}" && sleep 1
      df | egrep 'flux' | awk '{ print $1}' |
