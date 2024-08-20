@@ -1102,8 +1102,8 @@ function  fluxos_clean(){
 
   echo -e "${ARROW} ${CYAN}Removing syncthing...${NC}"
   sudo pkill -9 syncthing > /dev/null 2>&1
-  sudo apt-get remove --purge syncthing > /dev/null 2>&1
-  sudo apt-get autoremove > /dev/null 2>&1
+  sudo apt-get remove --purge syncthing -y > /dev/null 2>&1
+  sudo apt-get autoremove -y > /dev/null 2>&1
    
    if [[ $resource_check != 0 ]]; then
      echo -e "${ARROW} ${CYAN}Unmounting locked FluxOS resource${NC}" && sleep 1
