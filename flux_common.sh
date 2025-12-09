@@ -1795,9 +1795,9 @@ function cdn_speedtest() {
 	while [ $i -lt $len ];
    do
 		if [[ "$custom_url" == "1" ]]; then
-			testing=$(curl -m ${dTime} ${rand_by_domain[$i]}${BOOTSTRAP_FILE}  --output testspeed -fail --silent --show-error 2>&1)
+			testing=$(curl -L -m ${dTime} ${rand_by_domain[$i]}${BOOTSTRAP_FILE}  --output testspeed -fail --silent --show-error 2>&1)
 		else
-			testing=$(curl -m ${dTime} http://cdn-${rand_by_domain[$i]}.runonflux.io/apps/fluxshare/getfile/${BOOTSTRAP_FILE}  --output testspeed -fail --silent --show-error 2>&1)
+			testing=$(curl -L -m ${dTime} http://cdn-${rand_by_domain[$i]}.runonflux.io/apps/fluxshare/getfile/${BOOTSTRAP_FILE}  --output testspeed -fail --silent --show-error 2>&1)
 		fi
 		testing_size=$(grep -Po "\d+" <<< "$testing" | paste - - - - | awk '{printf  "%d\n",$3}')
 		mb=$(bc <<<"scale=2; $testing_size / 1048576 / $dTime" | awk '{printf "%2.2f\n", $1}')
@@ -1844,7 +1844,7 @@ function cdn_speedtest() {
 }
 
 function download_and_unpack() {
-    FILE_SIZE=$(curl -sI "$DOWNLOAD_URL" | grep -i "content-length" | awk '{print $2}' | tr -d '\r')
+    FILE_SIZE=$(curl -sSLI "$DOWNLOAD_URL" | grep -i "content-length" | awk '{print $2}' | tr -d '\r')
     if [ -z "$FILE_SIZE" ]; then
         echo "⚠️ Unable to retrieve file size. Progress will be approximate."
         FILE_SIZE=0
