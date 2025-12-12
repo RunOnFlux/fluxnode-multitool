@@ -1844,7 +1844,7 @@ function cdn_speedtest() {
 }
 
 function download_and_unpack() {
-    FILE_SIZE=$(curl -sSLI "$DOWNLOAD_URL" | grep -i "content-length" | awk '{print $2}' | tr -d '\r')
+    FILE_SIZE=$(curl -sSLI "$DOWNLOAD_URL" | grep -i "content-length" | tail -1 | awk '{print $2}' | tr -d '\r')
     if [ -z "$FILE_SIZE" ]; then
         echo "⚠️ Unable to retrieve file size. Progress will be approximate."
         FILE_SIZE=0
