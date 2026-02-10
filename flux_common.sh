@@ -1709,33 +1709,21 @@ function fluxos_reconfiguration {
  CHOICE=$(
  whiptail --title "FluxOS Configuration" --menu "Make your choice" 15 40 6 \
  "1)" "Replace Flux/SSP ID"   \
- "2)" "Enable/Disable thunder mode" \
- "3)" "Enable/Disable development mode" \
- "4)" "Blocked Ports Management" \
- "5)" "Blocked Repositories Management" \
- "6)" "FluxOS config backup" \
- "7)" "FluxOS config restore" 3>&2 2>&1 1>&3
+ "2)" "Enable/Disable development mode" \
+ "3)" "FluxOS config backup" \
+ "4)" "FluxOS config restore" 3>&2 2>&1 1>&3
 	)
 		case $CHOICE in
 		"1)")
 		replace_zelid
 		;;
-		"2)")
-		thunder_mode
-		;;
-	  "3)")
+	  "2)")
 		development_mode
 		;;
-	  "4)")
-		blocked_ports
-		;;
-    "5)")
-		blocked_repositories
-		;;
-  	"6)")
+  	"3)")
 		fluxosConfigBackup
 		;;	
-  	"7)")
+  	"4)")
 		fluxosConfigRestore
 		;;	
 	esac
