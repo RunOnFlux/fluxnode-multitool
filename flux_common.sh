@@ -1073,6 +1073,9 @@ function os_check(){
     if [[ "$os_version" -ge "2204" && "$architecture" == "amd64"  &&  "$avx_check" != "" ]]; then
       passed=1
     fi
+    if [[ "$os_version" -ge "2604" && "$architecture" == "amd64"  &&  "$avx_check" != "" ]]; then
+      passed=1
+    fi
     if [[ "$os_version" -ge "2310" && "$architecture" == "arm64" ]]; then
       passed=1
     fi     
