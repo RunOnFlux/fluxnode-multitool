@@ -2435,7 +2435,7 @@ function install_packages() {
 	if ! dirmngr --v > /dev/null 2>&1; then
 		sudo apt install dirmngr -y > /dev/null 2>&1
 	fi
-	sudo apt-get install software-properties-common ca-certificates -y > /dev/null 2>&1
+	sudo apt-get install software-properties-common ca-certificates gnupg -y > /dev/null 2>&1
 	sudo apt-get update -y > /dev/null 2>&1
 	sudo apt-get --with-new-pkgs upgrade -y > /dev/null 2>&1
 	sudo apt-get install nano htop pwgen ufw figlet tmux jq zip gzip pv unzip git -y > /dev/null 2>&1
