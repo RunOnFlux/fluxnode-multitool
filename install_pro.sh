@@ -410,6 +410,68 @@ function create_conf() {
 	fi      
 }
 function install_daemon() {
+    local KEYID="4B69CA27A986265D"
+    local KEYRING="/usr/share/keyrings/flux-archive-keyring.gpg"
+    local ARCH; ARCH="$(dpkg --print-architecture)"
+
+    sudo rm -f /etc/apt/sources.list.d/zelcash.list /etc/apt/sources.list.d/flux.list > /dev/null 2>&1
+    echo -e "${ARROW} ${YELLOW}Configuring daemon repository and importing public GPG Key${NC}"
+
+    # ----- Legacy path: Ubuntu 16.04 (xenial) only -----
+    if [[ "$(lsb_release -cs)" == "xenial" ]]; then
+        echo "deb https://apt.runonflux.io/ xenial main" | sudo tee /etc/apt/sources.list.d/flux.list > /dev/null 2>&1
+        gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys "$KEYID" > /dev/null 2>&1
+        gpg --export "$KEYID" | sudo apt-key add - > /dev/null 2>&1
+        if ! gpg --list-keys Zel > /dev/null 2>&1; then
+            gpg --keyserver hkp://keys.gnupg.net:80 --recv-keys "$KEYID" > /dev/null 2>&1
+            gpg --export "$KEYID" | sudo apt-key add - > /dev/null 2>&1
+        fi
+        flux_package && sleep 2
+        return
+    fi
+
+    # ----- Modern path: 18.04+ / Debian (signed-by keyring) -----
+    # Pick primary repo, fall back to the mirror if apt.runonflux.io is unreachable
+    local REPO="https://apt.runonflux.io/"
+    if [[ -z "$(curl -fsS -m 20 https://apt.runonflux.io/pool/main/f/flux/ 2>/dev/null | grep -o '[0-9]\.[0-9]\.[0-9]' | head -n1)" ]]; then
+        REPO="https://apt.fluxos.network/"
+    fi
+    echo "deb [arch=${ARCH} signed-by=${KEYRING}] ${REPO} focal main" | sudo tee /etc/apt/sources.list.d/flux.list > /dev/null 2>&1
+
+    # Import key as a DEARMORED keyring (apt rejects keybox/.kbx files)
+    import_key() {
+        sudo rm -f "$KEYRING" > /dev/null 2>&1
+        # 1) HTTPS download (no keyserver/dirmngr needed)
+        if curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x${KEYID}" \
+            | gpg --dearmor 2>/dev/null | sudo tee "$KEYRING" > /dev/null 2>&1; then
+            gpg --show-keys "$KEYRING" 2>/dev/null | grep -q "$KEYID" && return 0
+        fi
+        # 2) Fallback: keyserver fetch, then export + dearmor (still apt-compatible)
+        gpg --batch --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys "$KEYID" > /dev/null 2>&1
+        if gpg --export "$KEYID" | sudo tee "$KEYRING" > /dev/null 2>&1; then
+            gpg --show-keys "$KEYRING" 2>/dev/null | grep -q "$KEYID" && return 0
+        fi
+        return 1
+    }
+
+    local key_counter=0
+    until import_key; do
+        key_counter=$((key_counter + 1))
+        if [ "$key_counter" -gt 5 ]; then
+            echo -e ""
+            echo -e "${WORNING} ${RED}Importing public GPG Key failed...${NC}"
+            echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
+            echo -e ""
+            exit 1
+        fi
+        echo -e "${CYAN}Retrieve key failed, will try again...${NC}"
+        sleep 5
+    done
+
+    sudo chmod 644 "$KEYRING" > /dev/null 2>&1
+    flux_package && sleep 2
+}
+function install_daemon_old() {
    sudo rm /etc/apt/sources.list.d/zelcash.list > /dev/null 2>&1
    sudo rm /etc/apt/sources.list.d/flux.list > /dev/null 2>&1
    echo -e "${ARROW} ${YELLOW}Configuring daemon repository and importing public GPG Key${NC}" 
