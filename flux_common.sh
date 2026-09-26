@@ -2455,7 +2455,7 @@ function pm2_install(){
 		echo -e "${ARROW} ${CYAN}Configuring PM2...${NC}"
 		pm2 startup systemd -u $USER > /dev/null 2>&1
 		sudo env PATH=$PATH:/home/$USER/.nvm/versions/node/$(node -v)/bin pm2 startup systemd -u $USER --hp /home/$USER > /dev/null 2>&1
-		pm2 start ~/$FLUX_DIR/start.sh --name flux > /dev/null 2>&1
+		pm2 start ~/$FLUX_DIR/start.sh --kill-timeout 60000 --name flux > /dev/null 2>&1
 		pm2 save > /dev/null 2>&1
 		pm2 install pm2-logrotate > /dev/null 2>&1
 		pm2 set pm2-logrotate:max_size 6M > /dev/null 2>&1
@@ -2473,7 +2473,7 @@ function pm2_install(){
 }
 function finalizing() {
 	cd
-	pm2 start /home/$USER/$FLUX_DIR/start.sh --max-memory-restart 1500M --restart-delay 30000 --max-restarts 40 --name flux --time  > /dev/null 2>&1
+	pm2 start /home/$USER/$FLUX_DIR/start.sh --max-memory-restart 1500M --restart-delay 30000 --max-restarts 40 --kill-timeout 60000 --name flux --time  > /dev/null 2>&1
 	pm2 save > /dev/null 2>&1
 	#sleep 120
 	#cd /home/$USER/zelflux
