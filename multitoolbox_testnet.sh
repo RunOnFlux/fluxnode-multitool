@@ -308,7 +308,7 @@ fi
    echo -e "${ARROW} ${CYAN}Starting Flux....${NC}"
    echo -e "${ARROW} ${CYAN}Flux loading will take 2-3min....${NC}"
    echo
-   pm2 start /home/$USER/$FLUX_DIR/start.sh --restart-delay=60000 --max-restarts=40 --name flux --time  > /dev/null 2>&1
+   pm2 start /home/$USER/$FLUX_DIR/start.sh --restart-delay=60000 --max-restarts=40 --kill-timeout 60000 --name flux --time  > /dev/null 2>&1
    pm2 save > /dev/null 2>&1
    pm2 list
 
