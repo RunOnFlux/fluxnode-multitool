@@ -16,10 +16,8 @@ fi
 source /dev/stdin <<< "$(curl -s https://raw.githubusercontent.com/RunOnFlux/fluxnode-multitool/$ROOT_BRANCH/flux_common.sh)"
 
 
-BOOTSTRAP_ZIP='https://fluxnodeservice.com/daemon_bootstrap.tar.gz'
+# No built-in testnet bootstrap source
 BOOTSTRAP_ZIPFILE='daemon_bootstrap.tar.gz'
-BOOTSTRAP_URL_MONGOD='https://fluxnodeservice.com/mongod_bootstrap.tar.gz'
-BOOTSTRAP_ZIPFILE_MONGOD='mongod_bootstrap.tar.gz'
 KDA_BOOTSTRAP_ZIPFILE='kda_bootstrap.tar.gz'
 KDA_BOOTSTRAP_ZIP='http://202.61.207.10:16127/apps/fluxshare/getfile/kda_bootstrap.tar.gz?token=a705701758411b28ea20325ef9654e31e3d8f5f03a24b4e4e662e601a1250859'
 
@@ -436,13 +434,8 @@ fi
 
 if [[ "$skip_bootstrap" == "0" ]]; then
 
-if whiptail --yesno "Would you like use Flux bootstrap from script source?" 8 65; then
-bootstrap_url="$BOOTSTRAP_ZIP"
-sleep 1
-else
 bootstrap_url=$(whiptail --inputbox "Enter your Flux bootstrap URL" 8 65 3>&1 1>&2 2>&3)
 sleep 1
-fi
 
 if whiptail --yesno "Would you like keep bootstrap archive file localy?" 8 65; then
 bootstrap_zip_del='0'
@@ -792,8 +785,6 @@ function flux_daemon_bootstrap() {
         rm -rf /home/$USER/$CONFIG_DIR/blocks /home/$USER/$CONFIG_DIR/chainstate /home/$USER/$CONFIG_DIR/determ_zelnodes
     fi
 
-    BOOTSTRAP_ZIPFILE="${BOOTSTRAP_ZIP##*/}"
-    
     if [ -f "/home/$USER/$BOOTSTRAP_ZIPFILE" ]; then
     
      echo -e "${ARROW} ${YELLOW}Local bootstrap file detected...${NC}"
@@ -836,27 +827,7 @@ function flux_daemon_bootstrap() {
 	
     else
 
-            CHOICE=$(
-            whiptail --title "FLUXNODE INSTALLATION" --menu "Choose a method how to get bootstrap file" 10 47 2  \
-                "1)" "Download from source build in script" \
-                "2)" "Download from own source" 3>&2 2>&1 1>&3
-            )
-
-
-            case $CHOICE in
-	    "1)")   
-	        
-	        DB_HIGHT=$(curl -s -m 3 https://fluxnodeservice.com/daemon_bootstrap.json | jq -r '.block_height')
-		echo -e "${ARROW} ${CYAN}Flux daemon bootstrap height: ${GREEN}$DB_HIGHT${NC}"
-	 	echo -e "${ARROW} ${YELLOW}Downloading File: ${GREEN}$BOOTSTRAP_ZIP ${NC}"
-       		wget -O $BOOTSTRAP_ZIPFILE $BOOTSTRAP_ZIP -q --show-progress
-	        tar_file_unpack "/home/$USER/$BOOTSTRAP_ZIPFILE" "/home/$USER/$CONFIG_DIR" 
-		sleep 2
-
-
-
-	    ;;
-	    "2)")   
+        echo -e "${ARROW} ${CYAN}There is no built-in testnet bootstrap, enter your own source${NC}"
   		BOOTSTRAP_ZIP="$(whiptail --title "Flux daemon bootstrap setup" --inputbox "Enter your URL (zip, tar.gz)" 8 72 3>&1 1>&2 2>&3)"
 		echo -e "${ARROW} ${YELLOW}Downloading File: ${GREEN}$BOOTSTRAP_ZIP ${NC}"		
 		BOOTSTRAP_ZIPFILE="${BOOTSTRAP_ZIP##*/}"
@@ -874,8 +845,6 @@ function flux_daemon_bootstrap() {
 		    tar_file_unpack "/home/$USER/$BOOTSTRAP_ZIPFILE" "/home/$USER/$CONFIG_DIR"
 		    sleep 2
 		fi
-	    ;;
-            esac
 
     fi
     

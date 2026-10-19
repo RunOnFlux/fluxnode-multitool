@@ -14,10 +14,7 @@ Note: If you are having difficulties, try fastgit.org provider
  https://medium.com/zelinsights/zelnode-setup-the-easy-peasy-lemon-squeezy-way-fd89706ea03c <br>
  https://www.youtube.com/watch?v=i4dS-683Dlo
  
- <b>4) BOOTSTRAP AUTODEPLOY SERVICE (ALWAYS FRESH COPY):</b>  
-https://fluxnodeservice.com
-
- <b>5) HARDWARE REQUIREMENTS DEPEND ON MongoDB</b>  
+ <b>4) HARDWARE REQUIREMENTS DEPEND ON MongoDB</b>  
  https://www.mongodb.com/docs/manual/administration/production-notes/#std-label-prod-notes-supported-platforms
  
 <br>
