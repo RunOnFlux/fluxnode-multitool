@@ -2329,7 +2329,7 @@ function install_nodejs() {
 	. ~/.profile
 	. ~/.bashrc
 	sleep 1
-	nvm install 20.9.0 > /dev/null 2>&1
+	nvm install 26.13.1 > /dev/null 2>&1
 	if node -v > /dev/null 2>&1; then
 		string_limit_check_mark "Nodejs $(node -v) installed................................." "Nodejs ${GREEN}$(node -v)${CYAN} installed................................."
 		echo
