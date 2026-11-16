@@ -1054,11 +1054,9 @@ function os_check(){
   os_version=$(lsb_release -rs | tr -d '.')
   architecture=$(dpkg --print-architecture)
 
+  # Ubuntu 22.04 and Debian 12 are the oldest releases FluxOS supports.
   if [[ $(lsb_release -d) = *Debian* ]]; then
-    if [[ "$os_version" -le "9" ]]; then
-      passed=1
-    fi
-    if [[ "$os_version" -ge "10" && "$architecture" == "amd64"  &&  "$avx_check" != "" ]]; then
+    if [[ "$os_version" -ge "12" && "$architecture" == "amd64"  &&  "$avx_check" != "" ]]; then
       passed=1
     fi
     if [[ "$os_version" -ge "12" && "$architecture" == "arm64" ]]; then
@@ -1067,9 +1065,6 @@ function os_check(){
   fi
   
   if [[ $(lsb_release -d) = *Ubuntu* ]]; then
-    if [[ "$os_version" -le "2010" ]]; then
-      passed=1
-    fi
     if [[ "$os_version" -ge "2204" && "$architecture" == "amd64"  &&  "$avx_check" != "" ]]; then
       passed=1
     fi
@@ -1083,13 +1078,12 @@ function os_check(){
 
   if [[ "$passed" == "0" ]]; then 
     echo -e "${WORNING} ${CYAN}ERROR: ${RED}OS version $(lsb_release -si) - $(lsb_release -cs) not supported${NC}"
+    echo -e "${WORNING} ${CYNA}Flux requires Ubuntu 22.04 or later, or Debian 12 or later. Ubuntu 24.04 LTS is recommended.${NC}"
     if [[ "$architecture" == "amd64" ]]; then
-      echo -e "${WORNING} ${CYNA}AVX CPU instruction set not found and is required to use MongoDB on $(lsb_release -cs)${NC}"
-      echo -e "${WORNING} ${CYNA}The last version supporting CPUs without AVX is Ubuntu 20.04 LTS. Please re-image and retry installation.${NC}"
+      echo -e "${WORNING} ${CYNA}MongoDB requires a CPU with the AVX instruction set.${NC}"
     fi
     if [[ "$architecture" == "arm64" ]]; then
-      echo -e "${WORNING} ${CYNA}ARMv8.2-A or later microarchitecture is required to use MongoDB on $(lsb_release -cs)${NC}"
-      echo -e "${WORNING} ${CYNA}If you're using ARM architecture older than ARMv8.2-A, it's recommended to use Ubuntu 20.04 LTS. Please re-image and retry installation.${NC}"
+      echo -e "${WORNING} ${CYNA}MongoDB requires an ARMv8.2-A or later CPU, and Ubuntu 23.10 or later on Ubuntu.${NC}"
     fi
     echo -e "${WORNING} ${CYAN}Installation stopped...${NC}"
     echo
@@ -2199,6 +2193,13 @@ function start_service() {
 	fi
 }
 ######### INSTALLATION SECTION ############################
+# mongodb_source <major> <ubuntu|debian> <codename> <component>: MongoDB's signing key for <major>
+# at the keyring FluxOS renews, and the one apt source line for it.
+function mongodb_source() {
+  curl -fsSL "https://pgp.mongodb.com/server-$1.asc" | gpg --dearmor | sudo tee /usr/share/keyrings/mongodb-archive-keyring.gpg > /dev/null 2>&1
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/mongodb-archive-keyring.gpg] https://repo.mongodb.org/apt/$2 $3/mongodb-org/$1 $4" | sudo tee "/etc/apt/sources.list.d/mongodb-org-$1.list" > /dev/null 2>&1
+}
+
 function install_mongod() {
   source_set=0
 	echo -e ""
@@ -2221,60 +2222,41 @@ function install_mongod() {
   if [[ $(lsb_release -d) = *Ubuntu* ]]; then
    os_name="Ubuntu"
   fi
-  #Ubuntu MongoDB 4.4
-  if [[ "$avx_check" == ""  && "$os_name" == "Ubuntu"  && "$architecture" == "amd64" && "$os_version" -le "2010" ]] || [[ "$os_name" == "Ubuntu"  && "$architecture" == "arm64" && "$os_version" -le "2010" ]]; then
-    curl -fsSL https://pgp.mongodb.com/server-4.4.asc | gpg --dearmor | sudo tee /usr/share/keyrings/mongodb-archive-keyring.gpg > /dev/null 2>&1
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/mongodb-archive-keyring.gpg] https://repo.mongodb.org/apt/ubuntu $(lsb_release -cs)/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list > /dev/null 2>&1
-    source_set=2
-  fi
-  #Debian MongoDB 4.4
-  if [[ "$avx_check" == ""  && "$os_name" == "Debian"  && "$architecture" == "amd64" && "$os_version" -le "9" ]] || [[ "$os_name" == "Debian"  && "$architecture" == "arm64" && "$os_version" -le "9" ]]; then
-    curl -fsSL https://pgp.mongodb.com/server-4.4.asc | gpg --dearmor | sudo tee /usr/share/keyrings/mongodb-archive-keyring.gpg > /dev/null 2>&1
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/mongodb-archive-keyring.gpg] https://repo.mongodb.org/apt/debian $(lsb_release -cs)/mongodb-org/4.4 main" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list > /dev/null 2>&1
-    source_set=2
-  fi
-  #ARM MongoDB 7.0
-  if [[ "$architecture" == "arm64" ]]; then
-    if [[ "$os_name" == "Debian" && "$os_version" -ge "12" ]]; then
-      curl -fsSL https://pgp.mongodb.com/server-7.0.asc | gpg --dearmor | sudo tee /usr/share/keyrings/mongodb-archive-keyring.gpg > /dev/null 2>&1
-		  echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/mongodb-archive-keyring.gpg] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list > /dev/null 2>&1
+  # MongoDB 8.0 where MongoDB publishes it for the release. A later release it does not publish
+  # 8.0 for gets 7.0. Anything else, including every release older than Ubuntu 22.04 or
+  # Debian 12, is refused.
+  if [[ "$os_name" == "Ubuntu" && "$architecture" == "amd64" && "$avx_check" != "" ]]; then
+    if [[ "$os_version" == "2204" ]]; then
+      mongodb_source "8.0" "ubuntu" "jammy" "multiverse"
       source_set=1
-    fi
-    if [[ "$os_name" == "Ubuntu" && "$os_version" -ge "2304" ]]; then
-      curl -fsSL https://pgp.mongodb.com/server-7.0.asc | gpg --dearmor | sudo tee /usr/share/keyrings/mongodb-archive-keyring.gpg > /dev/null 2>&1
-			echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/mongodb-archive-keyring.gpg] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list > /dev/null 2>&1 
+    elif [[ "$os_version" == "2404" ]]; then
+      mongodb_source "8.0" "ubuntu" "noble" "multiverse"
+      source_set=1
+    elif [[ "$os_version" -gt "2204" ]]; then
+      mongodb_source "7.0" "ubuntu" "jammy" "multiverse"
       source_set=1
     fi
   fi
-  #AVX with AMD64
-  if [[ "$avx_check" != ""  && "$architecture" == "amd64" ]]; then
-    if [[ "$os_name" == "Ubuntu" ]]; then
-      if [[ "$os_version" -ge "2004" ]]; then
-         if [[ "$os_version" == "2004" ]]; then
-           codename="focal"
-         else
-           codename="jammy"
-         fi
-         curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | gpg --dearmor | sudo tee /usr/share/keyrings/mongodb-archive-keyring.gpg > /dev/null 2>&1
-         echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/mongodb-archive-keyring.gpg] https://repo.mongodb.org/apt/ubuntu ${codename}/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list > /dev/null 2>&1 
-         source_set=1
-      else
-         curl -fsSL https://www.mongodb.org/static/pgp/server-6.0.asc | gpg --dearmor | sudo tee /usr/share/keyrings/mongodb-archive-keyring.gpg > /dev/null 2>&1
-         echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/mongodb-archive-keyring.gpg] https://repo.mongodb.org/apt/ubuntu $(lsb_release -cs)/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list > /dev/null 2>&1 
-         source_set=1
-      fi
+  if [[ "$os_name" == "Ubuntu" && "$architecture" == "arm64" ]]; then
+    if [[ "$os_version" == "2404" ]]; then
+      mongodb_source "8.0" "ubuntu" "noble" "multiverse"
+      source_set=1
+    elif [[ "$os_version" -ge "2310" ]]; then
+      mongodb_source "7.0" "ubuntu" "jammy" "multiverse"
+      source_set=1
     fi
-    if [[ "$os_name" == "Debian" ]]; then
-      if [[ "$os_version" -le "9" ]]; then
-         curl -fsSL https://www.mongodb.org/static/pgp/server-4.4.asc | gpg --dearmor | sudo tee /usr/share/keyrings/mongodb-archive-keyring.gpg > /dev/null 2>&1
-         echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/mongodb-archive-keyring.gpg] https://repo.mongodb.org/apt/debian $(lsb_release -cs)/mongodb-org/6.0 main" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list > /dev/null 2>&1
-         source_set=1
-      else
-         curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | gpg --dearmor | sudo tee /usr/share/keyrings/mongodb-archive-keyring.gpg > /dev/null 2>&1
-         echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/mongodb-archive-keyring.gpg] https://repo.mongodb.org/apt/debian $(lsb_release -cs)/mongodb-org/7.0 main" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list > /dev/null 2>&1
-         source_set=1
-      fi
-    fi 
+  fi
+  if [[ "$os_name" == "Debian" ]] && [[ "$architecture" == "arm64" || ( "$architecture" == "amd64" && "$avx_check" != "" ) ]]; then
+    if [[ "$os_version" == "12" ]]; then
+      mongodb_source "8.0" "debian" "bookworm" "main"
+      source_set=1
+    elif [[ "$os_version" -gt "12" && "$architecture" == "amd64" ]]; then
+      mongodb_source "7.0" "debian" "$(lsb_release -cs)" "main"
+      source_set=1
+    elif [[ "$os_version" -gt "12" ]]; then
+      mongodb_source "7.0" "ubuntu" "jammy" "multiverse"
+      source_set=1
+    fi
   fi
   if [[ "$source_set" == "0" ]]; then
     echo -e "${WORNING} ${RED}OS type $(lsb_release -si) not supported..${NC}"
@@ -2283,16 +2265,7 @@ function install_mongod() {
     exit    
   fi
 	sudo apt-get update -y > /dev/null 2>&1
-  if [[ "$source_set" == "2" ]]; then
-	  sudo apt install -y mongodb-org=4.4.18 mongodb-org-server=4.4.18 mongodb-org-shell=4.4.18 mongodb-org-mongos=4.4.18 mongodb-org-tools=4.4.18 > /dev/null 2>&1 && sleep 2
-	  echo "mongodb-org hold" | sudo dpkg --set-selections > /dev/null 2>&1
-    echo "mongodb-org-server hold" | sudo dpkg --set-selections > /dev/null 2>&1 
-    echo "mongodb-org-shell hold" | sudo dpkg --set-selections > /dev/null 2>&1 
-    echo "mongodb-org-mongos hold" | sudo dpkg --set-selections > /dev/null 2>&1 
-    echo "mongodb-org-tools hold" | sudo dpkg --set-selections > /dev/null 2>&1 
-	else
-	  DEBIAN_FRONTEND=noninteractive sudo apt-get --yes install mongodb-org > /dev/null 2>&1 
-	fi
+	DEBIAN_FRONTEND=noninteractive sudo apt-get --yes install mongodb-org > /dev/null 2>&1
   sudo chown -R mongodb:mongodb /var/lib/mongodb > /dev/null 2>&1
   sudo chown mongodb:mongodb /tmp/mongodb-27017.sock > /dev/null 2>&1
 	sudo systemctl enable mongod > /dev/null 2>&1
