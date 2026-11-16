@@ -635,7 +635,7 @@ function install_flux() {
 	if [[ "$mongod_check" != "" && "$mongod_check" != "null" ]]; then
 		#echo -e "${ARROW} ${YELLOW}Detected Flux MongoDB local apps collection ...${NC}" && sleep 1
 		echo -e "${ARROW} ${CYAN}Cleaning MongoDB Flux local apps collection...${NC}" && sleep 1
-		echo "db.zelappsinformation.drop()" | mongo localzelapps > /dev/null 2>&1
+		mongosh localzelapps --quiet --eval "db.zelappsinformation.drop()" > /dev/null 2>&1
 	fi
 
 	if [[ $docker_check != 0 ]]; then
