@@ -586,10 +586,11 @@ function start_daemon() {
 	else
 		echo -e ""
 		echo -e "${WORNING} ${RED}Something is not right the daemon did not start or still loading...${NC}"
-		if [[ -f /home/$USER/$CONFIG_DIR/debug.log ]]; then
-			error_line=$(egrep -a --color 'Error:' /home/$USER/$CONFIG_DIR/debug.log | tail -1 | sed 's/[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}.[0-9]\{2\}.[0-9]\{2\}.[0-9]\{2\}.//')	  
+		fluxd_dirs
+		if [[ -f $FLUXD_DEBUG_LOG ]]; then
+			error_line=$(egrep -a --color 'Error:' "$FLUXD_DEBUG_LOG" | tail -1 | sed 's/[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}.[0-9]\{2\}.[0-9]\{2\}.[0-9]\{2\}.//')	  
 			if [[ "$error_line" != "" ]]; then	  
-				echo -e "${WORNING} ${CYAN}Last error from ~/$CONFIG_DIR/debug.log: ${NC}"
+				echo -e "${WORNING} ${CYAN}Last error from $FLUXD_DEBUG_LOG: ${NC}"
 				echo -e "${WORNING} ${CYAN}$error_line${NC}"
 				echo -e ""
 				exit
@@ -693,7 +694,8 @@ selfhosting "install"
 install_process
 start_daemon
 log_rotate "Flux benchmark" "bench_debug_log" "/home/$USER/$BENCH_DIR_LOG/debug.log" "monthly" "2"
-log_rotate "Flux daemon" "daemon_debug_log" "/home/$USER/$CONFIG_DIR/debug.log" "daily" "7"
+fluxd_dirs
+log_rotate "Flux daemon" "daemon_debug_log" "$FLUXD_DEBUG_LOG" "daily" "7"
 log_rotate "MongoDB" "mongod_debug_log" "/var/log/mongodb/*.log" "daily" "14"
 #log_rotate "Docker" "docker_debug_log" "/var/lib/docker/containers/*/*.log" "daily" "7"
 basic_security
