@@ -1744,6 +1744,27 @@ function fluxos_reconfiguration {
 	esac
 }
 ######### BOOTSTRAP SECTION ############################
+# Sets FLUXD_CHAIN_DIR, the directory holding fluxd's chain (blocks, chainstate, determ_zelnodes:
+# what a bootstrap or a chain stream holds at its top), and FLUXD_DEBUG_LOG, fluxd's log, as the
+# installed fluxd resolves them for the data directory $1 (default $FLUX_DAEMON_PATH).
+# Only a fluxd whose -help lists -printdirs is asked: an older fluxd given any option other than
+# -help or -version writes fluxnode.conf at the top of its data directory, which makes a sorted
+# data directory mixed, and with daemon=1 it starts a node. Without such a fluxd, or when it
+# cannot answer, both are in the data directory itself.
+function fluxd_dirs() {
+	local datadir="${1:-$FLUX_DAEMON_PATH}"
+	local help dirs chain log
+	FLUXD_CHAIN_DIR="$datadir"
+	FLUXD_DEBUG_LOG="$datadir/debug.log"
+	help=$(fluxd -help 2>/dev/null) || return 0
+	grep -qE '^[[:space:]]*-printdirs([[:space:]]|$)' <<< "$help" || return 0
+	dirs=$(fluxd -datadir="$datadir" -printdirs 2>/dev/null) || return 0
+	chain=$(jq -r '.chain // empty' <<< "$dirs" 2>/dev/null)
+	log=$(jq -r '.debuglog // empty' <<< "$dirs" 2>/dev/null)
+	[[ -n $chain ]] && FLUXD_CHAIN_DIR="$chain"
+	[[ -n $log ]] && FLUXD_DEBUG_LOG="$log"
+	return 0
+}
 function tar_file_unpack() {
 	local TARFILE=$1
 	local DEST_DIR=$2
@@ -1856,7 +1877,9 @@ function download_and_unpack() {
     START_TIME=$(date +%s)
     # Download and extract with progress using pigz
     echo -e "${ARROW} ${CYAN}Downloading File: ${GREEN}$DOWNLOAD_URL ${NC}"
-    if curl -sSL "$DOWNLOAD_URL" | pv -s "$FILE_SIZE" | pigz -dc | tar -x -C "$FLUX_DAEMON_PATH"; then
+    fluxd_dirs
+    mkdir -p "$FLUXD_CHAIN_DIR"
+    if curl -sSL "$DOWNLOAD_URL" | pv -s "$FILE_SIZE" | pigz -dc | tar -x -C "$FLUXD_CHAIN_DIR"; then
         # Record the end time
         END_TIME=$(date +%s)
         ELAPSED_TIME=$((END_TIME - START_TIME))
@@ -1932,9 +1955,8 @@ function bootstrap_new() {
 # Clean data directories
 clean() {
     local silent_mode=$1
-    cd $DEST_PATH 2>/dev/null
-    sudo rm -rf blocks chainstate determ_zelnodes 2>/dev/null
-    cd 2>/dev/null
+    fluxd_dirs
+    sudo rm -rf "${FLUXD_CHAIN_DIR:?}/blocks" "${FLUXD_CHAIN_DIR:?}/chainstate" "${FLUXD_CHAIN_DIR:?}/determ_zelnodes" 2>/dev/null
     [ "$silent_mode" != "true" ] && echo -e "🧹 Cleaned data directories."
 }
 
@@ -2033,6 +2055,8 @@ discover_upnp_nodes() {
 stream_chain_locally() {
     local silent_mode=$1
     [ "$silent_mode" != "true" ] && echo -e "📂 Starting local chain streaming..."
+    fluxd_dirs
+    mkdir -p "$FLUXD_CHAIN_DIR"
     for tier in "stratus_new" "nimbus_new" "cumulus_new"; do
         nodes=(${node_map[$tier]})
         for node in "${nodes[@]}"; do
@@ -2041,11 +2065,11 @@ stream_chain_locally() {
             if [ $preparation != "success" ]; then
               continue
             fi
-            curl -s -X POST "http://${node}/flux/streamchain" | tar -xv -C "$DEST_PATH"
+            curl -s -X POST "http://${node}/flux/streamchain" | tar -xv -C "$FLUXD_CHAIN_DIR"
             if [ $? -eq 0 ]; then
                 [ "$silent_mode" != "true" ] && echo -e "✅ Successfully streamed chain from $node"
                 if [ -n "$FLUXOS_VERSION" ]; then
-                    sudo chown -R fluxd:fluxd "$DEST_PATH"
+                    sudo chown -R fluxd:fluxd "$FLUXD_CHAIN_DIR"
                 fi
                 return 0
             else
@@ -2096,11 +2120,9 @@ function bootstrap_manual() {
 	;;
 	"2)")
 	    if [ -n "$FLUXOS_VERSION" ]; then
-            DEST_PATH="/dat/var/lib/fluxd"
             FLUXD_SERVICE="fluxd"
             WATCHDOG_SERVICE="flux-watchdog"
         else
-            DEST_PATH="$HOME/.flux"
             FLUXD_SERVICE="zelcash"
         fi
 
@@ -2141,27 +2163,11 @@ function bootstrap_manual() {
 	;;
 	esac
 }
-function bootstrap_local() {
-	local BOOTSTRAP_STEM="flux_explorer_bootstrap"
-	local BOOTSTRAP_FILES=($(ls $DATA_PATH/$BOOTSTRAP_STEM.{tar,tar.gz} 2>/dev/null))
-
-	if [ "$BOOTSTRAP_FILES" -a ${#BOOTSTRAP_FILES[@]} ]; then
-		# we take the first bootstrap file
-		FILE_PATH="$BOOTSTRAP_FILES"
-		echo -e "${ARROW} ${CYAN}Local bootstrap file detected...${NC}"
-		check_tar "$FILE_PATH"
-		if [ -f "$FILE_PATH" ]; then
-			if [[ "$Mode" != "install" ]]; then
-				stop_service
-			fi
-			tar_file_unpack "$FILE_PATH" "$FLUX_DAEMON_PATH"
-		fi
-	fi
-}
 function flux_chain_date_wipe() {
-	if [[ -e $FLUX_DAEMON_PATH/blocks ]] && [[ -e $FLUX_DAEMON_PATH/chainstate ]]; then
+	fluxd_dirs
+	if [[ -e $FLUXD_CHAIN_DIR/blocks ]] && [[ -e $FLUXD_CHAIN_DIR/chainstate ]]; then
 		echo -e "${ARROW} ${CYAN}Removing blocks, chainstate, determ_zelnodes directories...${NC}"
-		sudo rm -rf $FLUX_DAEMON_PATH/blocks $FLUX_DAEMON_PATH/chainstate $FLUX_DAEMON_PATH/determ_zelnodes > /dev/null 2>&1
+		sudo rm -rf "${FLUXD_CHAIN_DIR:?}/blocks" "${FLUXD_CHAIN_DIR:?}/chainstate" "${FLUXD_CHAIN_DIR:?}/determ_zelnodes" > /dev/null 2>&1
 	fi
 }
 function stop_service() {

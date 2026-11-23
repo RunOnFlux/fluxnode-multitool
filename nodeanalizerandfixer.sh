@@ -952,14 +952,15 @@ if [ -f /home/$USER/$BENCH_DIR_LOG/debug.log ]; then
 		echo -e ""
 	fi
 fi
-if [ -f /home/$USER/$CONFIG_DIR/debug.log ]; then
-	echo -e "${BOOK} ${YELLOW}Checking Flux daemon ~/$CONFIG_DIR/debug.log${NC}"
-	if [[ $(egrep -ac -wi --color 'error|failed' /home/$USER//$CONFIG_DIR/debug.log) != "0" ]]; then
-		echo -e "${YELLOW}${WORNING} ${CYAN}Found: ${RED}$(egrep -ac -wi --color 'error|failed' /home/$USER/$CONFIG_DIR/debug.log)${CYAN} error events, ${RED}$(egrep -ac -wi --color 'benchmarking' /home/$USER/$CONFIG_DIR/debug.log) ${CYAN}related to benchmark${NC}"
-		if [[ $(egrep -ac -wi --color 'benchmarking' /home/$USER/$CONFIG_DIR/debug.log) != "0" ]]; then
+fluxd_dirs "/home/$USER/$CONFIG_DIR"
+if [ -f "$FLUXD_DEBUG_LOG" ]; then
+	echo -e "${BOOK} ${YELLOW}Checking Flux daemon $FLUXD_DEBUG_LOG${NC}"
+	if [[ $(egrep -ac -wi --color 'error|failed' "$FLUXD_DEBUG_LOG") != "0" ]]; then
+		echo -e "${YELLOW}${WORNING} ${CYAN}Found: ${RED}$(egrep -ac -wi --color 'error|failed' "$FLUXD_DEBUG_LOG")${CYAN} error events, ${RED}$(egrep -ac -wi --color 'benchmarking' "$FLUXD_DEBUG_LOG") ${CYAN}related to benchmark${NC}"
+		if [[ $(egrep -ac -wi --color 'benchmarking' "$FLUXD_DEBUG_LOG") != "0" ]]; then
 			echo -e "${BOOK} ${CYAN}FluxBench errors info:${NC}"
-			error_line=$(egrep -a --color 'benchmarking' /home/$USER/$CONFIG_DIR/debug.log | tail -1 | sed 's/[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}.[0-9]\{2\}.[0-9]\{2\}.[0-9]\{2\}.//')
-			event_date=$(egrep -a --color 'benchmarking' /home/$USER/$CONFIG_DIR/debug.log | tail -1 | grep -o '[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}.[0-9]\{2\}.[0-9]\{2\}.[0-9]\{2\}')
+			error_line=$(egrep -a --color 'benchmarking' "$FLUXD_DEBUG_LOG" | tail -1 | sed 's/[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}.[0-9]\{2\}.[0-9]\{2\}.[0-9]\{2\}.//')
+			event_date=$(egrep -a --color 'benchmarking' "$FLUXD_DEBUG_LOG" | tail -1 | grep -o '[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}.[0-9]\{2\}.[0-9]\{2\}.[0-9]\{2\}')
 			echo -e "${PIN} ${CYAN}Last error line: $error_line${NC}"
 			event_time_uxtime=$(date -ud "$event_date" +"%s")
 			event_human_time_local=$(date -d @"$event_time_uxtime" +'%Y-%m-%d %H:%M:%S [%z]')
@@ -971,7 +972,7 @@ if [ -f /home/$USER/$CONFIG_DIR/debug.log ]; then
 			show_time "$tdiff"
 		fi
 		echo -e "${PIN} ${CYAN}Creating flux_daemon_debug_error.log${NC}"
-		egrep -a --color 'error|failed' /home/$USER/$CONFIG_DIR/debug.log > /home/$USER/flux_daemon_debug_error.log
+		egrep -a --color 'error|failed' "$FLUXD_DEBUG_LOG" > /home/$USER/flux_daemon_debug_error.log
 		echo -e ""
 	else
 		echo -e "${GREEN}\xF0\x9F\x94\x8A ${CYAN}Found: ${GREEN}0 errors${NC}"
