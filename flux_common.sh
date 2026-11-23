@@ -1751,16 +1751,21 @@ function fluxos_reconfiguration {
 # -help or -version writes fluxnode.conf at the top of its data directory, which makes a sorted
 # data directory mixed, and with daemon=1 it starts a node. Without such a fluxd, or when it
 # cannot answer, both are in the data directory itself.
+# A legacy node keeps the old layout: a data directory fluxd has not yet started in (sorted, with
+# no chain directory) also gets the chain at its top, so fluxd finds the old layout when it starts.
+# Only a node fluxd already started sorted keeps its chain in the chain directory fluxd made.
 function fluxd_dirs() {
 	local datadir="${1:-$FLUX_DAEMON_PATH}"
-	local help dirs chain log
+	local help dirs layout chain log
 	FLUXD_CHAIN_DIR="$datadir"
 	FLUXD_DEBUG_LOG="$datadir/debug.log"
 	help=$(fluxd -help 2>/dev/null) || return 0
 	grep -qE '^[[:space:]]*-printdirs([[:space:]]|$)' <<< "$help" || return 0
 	dirs=$(fluxd -datadir="$datadir" -printdirs 2>/dev/null) || return 0
+	layout=$(jq -r '.layout // empty' <<< "$dirs" 2>/dev/null)
 	chain=$(jq -r '.chain // empty' <<< "$dirs" 2>/dev/null)
 	log=$(jq -r '.debuglog // empty' <<< "$dirs" 2>/dev/null)
+	[[ $layout == sorted && ! -d $chain ]] && return 0
 	[[ -n $chain ]] && FLUXD_CHAIN_DIR="$chain"
 	[[ -n $log ]] && FLUXD_DEBUG_LOG="$log"
 	return 0
