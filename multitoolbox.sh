@@ -253,7 +253,7 @@ function install_flux() {
       echo -e "${ARROW} ${CYAN}Starting FluxOS....${NC}"
       echo -e "${ARROW} ${CYAN}FluxOS loading will take 2-3min....${NC}"
       echo -e ""
-      pm2 start /home/$USER/$FLUX_DIR/start.sh --max-memory-restart 1500M --restart-delay 30000 --max-restarts 40 --name flux --time  > /dev/null 2>&1
+      pm2 start /home/$USER/$FLUX_DIR/start.sh --max-memory-restart 1500M --restart-delay 30000 --max-restarts 40 --kill-timeout 60000 --name flux --time  > /dev/null 2>&1
       pm2 save > /dev/null 2>&1
       pm2 list
     else
